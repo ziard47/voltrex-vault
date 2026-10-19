@@ -14,12 +14,14 @@ const vault_service_1 = require("./services/vault-service");
 const manager_1 = require("./clipboard/manager");
 const gdrive_service_1 = require("./services/gdrive-service");
 const backup_scheduler_1 = require("./services/backup-scheduler");
+const extension_bridge_1 = require("./ipc/extension-bridge");
 const handlers_1 = require("./ipc/handlers");
 let mainWindow = null;
 let vaultService = null;
 let clipboardManager = null;
 let gdriveService = null;
 let backupScheduler = null;
+let extensionBridge = null;
 const isDev = process.env.NODE_ENV === 'development' || !electron_1.app.isPackaged;
 async function createWindow() {
     const userDataPath = electron_1.app.getPath('userData');
@@ -32,6 +34,8 @@ async function createWindow() {
     clipboardManager = new manager_1.ClipboardManager();
     gdriveService = new gdrive_service_1.GoogleDriveService(userDataPath);
     backupScheduler = new backup_scheduler_1.BackupScheduler(vaultService, gdriveService);
+    extensionBridge = new extension_bridge_1.ExtensionBridgeServer(vaultService, userDataPath);
+    await extensionBridge.start();
     mainWindow = new electron_1.BrowserWindow({
         width: 1200,
         height: 800,
@@ -147,6 +151,10 @@ else {
         }
     });
     electron_1.app.on('before-quit', () => {
+        if (extensionBridge) {
+            extensionBridge.close();
+            extensionBridge = null;
+        }
         if (backupScheduler) {
             backupScheduler.close();
             backupScheduler = null;

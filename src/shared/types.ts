@@ -112,6 +112,12 @@ export interface PasswordGeneratorOptions {
   excludeAmbiguous: boolean; // e.g. 0, O, o, 1, l, I
 }
 
+export interface GeneratedPasswordResult {
+  password: string;
+  entropyBits: number;
+  strengthLabel: string;
+}
+
 export interface ExportData {
   format: 'voltrex-vault-unencrypted-export';
   exportVersion: 1;

@@ -180,15 +180,22 @@ npm test
 ```
 
 ### Type Checking & Linting
-Validate strict TypeScript compilation across renderer and Electron processes:
+Validate strict TypeScript compilation across desktop renderer, Electron processes, and browser extension:
 ```bash
 npm run typecheck
 ```
 
-### Building the Application
-Build both the Vite React bundle and compile the Electron main/preload processes:
+### Building the Application & Extension
+Build the Vite React desktop bundle, compile Electron main/preload/native-host, and bundle the Chrome extension:
 ```bash
 npm run build
+```
+
+Or build individual targets:
+```bash
+npm run build:vite       # Desktop React renderer
+npm run build:electron   # Electron main, preload, and native host
+npm run build:extension  # Chromium extension (manifest, popup, background, content)
 ```
 
 ### Launching the Desktop Application
@@ -204,3 +211,105 @@ npm run dev:vite
 # Terminal 2: Run Electron
 npm run dev:electron
 ```
+
+---
+
+## 4. Phase 3: Chromium Browser Extension & Native Messaging
+
+Voltrex Vault includes a companion Chromium extension (Chrome, Brave, Edge, Vivaldi) delivering a seamless autofill experience inspired by 1Password, while strictly keeping the desktop application as the sole cryptographic authority.
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   Chromium Browser                     │
+│                                                        │
+│   ┌────────────────────────┐  ┌────────────────────┐   │
+│   │   Content Script       │  │    Popup UI        │   │
+│   │   - Isolated Frame     │  │    React + Tailwind│   │
+│   │   - User-driven Fill   │  │    Voltrex Palette │   │
+│   │   - No Auto-Submit     │  │    Entropy Meter   │   │
+│   └───────────┬────────────┘  └─────────┬──────────┘   │
+│               │                         │              │
+│               ▼                         ▼              │
+│   ┌────────────────────────────────────────────────┐   │
+│   │        Background Service Worker (MV3)         │   │
+│   │        - Transient In-Memory Candidates        │   │
+│   │        - Active Tab Canonical Origin Match     │   │
+│   │        - Zero Secrets in Browser Storage       │   │
+│   └───────────────────────┬────────────────────────┘   │
+└───────────────────────────┼────────────────────────────┘
+                            │ Chrome Native Messaging (stdio)
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│     Native Messaging Host (com.voltrex.vault)          │
+│     - Node.js / TypeScript Stdio Host                  │
+│     - Strict Command Allowlist & 1MB Length Limit      │
+│     - Connects via Local Domain Socket / Named Pipe    │
+└───────────────────────────┬────────────────────────────┘
+                            │ Unix Domain Socket (`0600`) / Named Pipe
+                            ▼
+┌────────────────────────────────────────────────────────┐
+│             Desktop Application (Electron)             │
+│   ┌────────────────────────────────────────────────┐   │
+│   │           Extension Bridge Server              │   │
+│   │   - Restrictive Socket Permissions (`0600`)   │   │
+│   │   - Origin Enforcement on Credential Retrieval │   │
+│   │   - Insecure HTTP Autofill Blocking            │   │
+│   └───────────────────────┬────────────────────────┘   │
+│                           │                            │
+│                           ▼                            │
+│   ┌────────────────────────────────────────────────┐   │
+│   │        Voltrex VaultService (Master Auth)      │   │
+│   └────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────┘
+```
+
+### A. Security Boundaries & Threat Model
+
+1. **Desktop App is the Sole Authority**:
+   - The browser extension never possesses the Argon2id KDF keys, the master password, the DEK, or the SQLite database.
+   - When the vault is locked or the desktop application is closed, the extension cannot retrieve passwords.
+2. **Zero Plaintext Stored in Browser**:
+   - The extension stores no plaintext passwords or credentials in `chrome.storage.local`, `chrome.storage.sync`, or IndexedDB.
+   - Captured candidate logins are stored in volatile service worker memory for that specific tab and are purged on tab close or page navigation.
+3. **Dedicated Native Messaging Host (`com.voltrex.vault`)**:
+   - No local unauthenticated HTTP server or exposed WebSocket.
+   - Communicates strictly over standard input/output (`stdio`) mediated by Chromium's native messaging infrastructure.
+   - Connects to the desktop app via an OS-level Unix domain socket with restrictive `0600` permissions (or Windows Named Pipe).
+4. **Command Allowlist & Payload Guards**:
+   - Native host strictly validates input length with a 1 MB ceiling (`MAX_NATIVE_MESSAGE_BYTES = 1,048,576`).
+   - Allowed commands only: `status`, `search-logins`, `get-login`, `generate-password`, `save-login`, `lock-vault`.
+   - All search queries omit secret passwords; only title, username, and ID are returned for display.
+5. **Canonical Origin Matching**:
+   - Origins are normalized according to RFC 3986 (scheme, host, port).
+   - Strict subdomain separation: `app.service.com` will never receive credentials saved for `billing.service.com` or `service.com`.
+   - Internationalized Domain Names (IDN) and Punycode spoofing defense via standard URL host normalization.
+   - Insecure plain `http:` origins are blocked by default from autofill.
+6. **No Auto-Submit & User-Driven Autofill**:
+   - Credentials are NEVER injected on page load. Autofill requires an explicit user click on "Fill" in the extension popup.
+   - The content script never submits forms (`form.submit()` or simulating Enter is forbidden).
+   - Frame isolation: Autofill is blocked inside untrusted third-party or cross-origin iframes.
+
+### B. Installing & Registering the Browser Extension
+
+#### 1. Register the Native Messaging Host
+Register the host manifest `com.voltrex.vault.json` for installed Chromium browsers:
+```bash
+npm run register:host
+```
+*Supported browsers: Google Chrome, Chromium, Brave, Microsoft Edge, Vivaldi.*
+
+#### 2. Build the Extension
+```bash
+npm run build:extension
+```
+This generates the standalone unpacked extension bundle in `dist/extension/`.
+
+#### 3. Load the Extension in Your Browser
+1. Open your Chromium browser and navigate to `chrome://extensions` (or `brave://extensions`, `edge://extensions`).
+2. Enable **Developer mode** (toggle in top right).
+3. Click **Load unpacked** and select the `dist/extension` directory inside the `voltrex-vault` project.
+4. Copy the Extension ID (e.g., `abcdefghijklmnopqrstuvwxyz123456`) and register it with the native host:
+   ```bash
+   npm run register:host -- --extension-id <YOUR_EXTENSION_ID>
+   ```
+5. Launch the desktop app (`npm start`), unlock your vault, and click the Voltrex Vault extension icon in your browser toolbar to autofill, generate passwords, and capture logins.

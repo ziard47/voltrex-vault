@@ -10,6 +10,7 @@ import { VaultService } from './services/vault-service';
 import { ClipboardManager } from './clipboard/manager';
 import { GoogleDriveService } from './services/gdrive-service';
 import { BackupScheduler } from './services/backup-scheduler';
+import { ExtensionBridgeServer } from './ipc/extension-bridge';
 import { registerIpcHandlers } from './ipc/handlers';
 
 let mainWindow: BrowserWindow | null = null;
@@ -17,6 +18,7 @@ let vaultService: VaultService | null = null;
 let clipboardManager: ClipboardManager | null = null;
 let gdriveService: GoogleDriveService | null = null;
 let backupScheduler: BackupScheduler | null = null;
+let extensionBridge: ExtensionBridgeServer | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
 
@@ -33,6 +35,9 @@ async function createWindow(): Promise<void> {
   clipboardManager = new ClipboardManager();
   gdriveService = new GoogleDriveService(userDataPath);
   backupScheduler = new BackupScheduler(vaultService, gdriveService);
+
+  extensionBridge = new ExtensionBridgeServer(vaultService, userDataPath);
+  await extensionBridge.start();
 
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -160,6 +165,10 @@ if (!gotTheLock) {
   });
 
   app.on('before-quit', () => {
+    if (extensionBridge) {
+      extensionBridge.close();
+      extensionBridge = null;
+    }
     if (backupScheduler) {
       backupScheduler.close();
       backupScheduler = null;
