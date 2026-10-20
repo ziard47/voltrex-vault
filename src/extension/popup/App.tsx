@@ -235,7 +235,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-[480px] bg-black text-gray-200">
+    <div className="flex flex-col w-[380px] h-[520px] bg-black text-gray-200 overflow-hidden select-none">
       <Header
         status={connectionStatus}
         onLockVault={handleLockVault}
@@ -255,7 +255,7 @@ export const App: React.FC = () => {
       )}
 
       {/* Main Tab Content */}
-      <div className="flex-1">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {currentTab === 'vault' && (
           <MatchingLogins
             status={connectionStatus}
@@ -267,6 +267,7 @@ export const App: React.FC = () => {
             onCopyUsername={handleCopyUsername}
             onCopyPassword={handleCopyPassword}
             isLoading={isLoading}
+            onRefresh={refresh}
           />
         )}
 
@@ -289,35 +290,41 @@ export const App: React.FC = () => {
       </div>
 
       {/* Navigation Footer */}
-      <nav className="flex items-center justify-around py-2 bg-[#11130e] border-t border-[#3E432E]">
+      <nav className="shrink-0 h-14 bg-[#0d0f0a] border-t border-[#2a2f20] px-2 py-1.5 grid grid-cols-3 gap-1">
         <button
           onClick={() => setCurrentTab('vault')}
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition-colors ${
-            currentTab === 'vault' ? 'text-[#A7D129]' : 'text-neutral-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-1 py-1 rounded-md transition-all ${
+            currentTab === 'vault'
+              ? 'text-[#A7D129] bg-[#1a1f13] font-semibold'
+              : 'text-neutral-400 hover:text-white hover:bg-[#14170e]'
           }`}
         >
           <Shield className="w-4 h-4" />
-          <span>Vault</span>
+          <span className="text-[10px] tracking-tight">Vault</span>
         </button>
 
         <button
           onClick={() => setCurrentTab('generator')}
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition-colors ${
-            currentTab === 'generator' ? 'text-[#A7D129]' : 'text-neutral-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-1 py-1 rounded-md transition-all ${
+            currentTab === 'generator'
+              ? 'text-[#A7D129] bg-[#1a1f13] font-semibold'
+              : 'text-neutral-400 hover:text-white hover:bg-[#14170e]'
           }`}
         >
           <KeyRound className="w-4 h-4" />
-          <span>Generator</span>
+          <span className="text-[10px] tracking-tight">Generator</span>
         </button>
 
         <button
           onClick={() => setCurrentTab('diagnostics')}
-          className={`flex flex-col items-center gap-1 text-[11px] font-medium transition-colors ${
-            currentTab === 'diagnostics' ? 'text-[#A7D129]' : 'text-neutral-400 hover:text-white'
+          className={`flex flex-col items-center justify-center gap-1 py-1 rounded-md transition-all ${
+            currentTab === 'diagnostics'
+              ? 'text-[#A7D129] bg-[#1a1f13] font-semibold'
+              : 'text-neutral-400 hover:text-white hover:bg-[#14170e]'
           }`}
         >
           <Wrench className="w-4 h-4" />
-          <span>Diagnostics</span>
+          <span className="text-[10px] tracking-tight">Diagnostics</span>
         </button>
       </nav>
     </div>

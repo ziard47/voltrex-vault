@@ -21,6 +21,7 @@ let backupScheduler: BackupScheduler | null = null;
 let extensionBridge: ExtensionBridgeServer | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+app.name = 'voltrex-vault';
 
 async function createWindow(): Promise<void> {
   const userDataPath = app.getPath('userData');

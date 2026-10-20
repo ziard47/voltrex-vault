@@ -33,6 +33,15 @@ function resolveDefaultBridgeSocket() {
         // Linux standard XDG config home
         const xdgConfig = process.env.XDG_CONFIG_HOME || node_path_1.default.join(home, '.config');
         baseDir = node_path_1.default.join(xdgConfig, 'voltrex-vault');
+        const primaryPath = node_path_1.default.join(baseDir, 'voltrex_bridge.sock');
+        if (node_fs_1.default.existsSync(primaryPath)) {
+            return primaryPath;
+        }
+        // Dev fallback if Electron was launched without custom app.name
+        const devPath = node_path_1.default.join(xdgConfig, 'Electron', 'voltrex_bridge.sock');
+        if (node_fs_1.default.existsSync(devPath)) {
+            return devPath;
+        }
     }
     return node_path_1.default.join(baseDir, 'voltrex_bridge.sock');
 }

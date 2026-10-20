@@ -16,16 +16,18 @@ export const Header: React.FC<HeaderProps> = ({
   isLoading,
 }) => {
   return (
-    <header className="flex items-center justify-between px-4 py-3 bg-[#11130e] border-b border-[#3E432E]">
-      <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded bg-[#3E432E] flex items-center justify-center border border-[#616F39]/50">
+    <header className="flex items-center justify-between px-3.5 py-2.5 bg-[#0f110c] border-b border-[#2a2f20] shrink-0">
+      <div className="flex items-center gap-2.5 min-w-0">
+        <div className="w-7 h-7 rounded bg-[#1e2316] flex items-center justify-center border border-[#616F39]/50 shrink-0">
           <Shield className="w-4 h-4 text-[#A7D129]" />
         </div>
-        <div>
-          <h1 className="text-sm font-semibold tracking-wide text-white">VOLTREX VAULT</h1>
-          <div className="flex items-center gap-1.5 text-[10px]">
+        <div className="min-w-0">
+          <h1 className="text-xs font-bold tracking-wider text-white uppercase whitespace-nowrap">
+            VOLTREX VAULT
+          </h1>
+          <div className="flex items-center gap-1.5 text-[10px] mt-0.5">
             <span
-              className={`w-1.5 h-1.5 rounded-full ${
+              className={`w-1.5 h-1.5 rounded-full shrink-0 ${
                 !status.isAppRunning
                   ? 'bg-neutral-500'
                   : status.isUnlocked
@@ -33,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
                   : 'bg-amber-400'
               }`}
             />
-            <span className="text-[#8e9c60] font-mono uppercase">
+            <span className="text-[#8e9c60] font-mono uppercase whitespace-nowrap text-[9px] tracking-wide">
               {!status.isAppRunning
                 ? 'Desktop Closed'
                 : status.isUnlocked

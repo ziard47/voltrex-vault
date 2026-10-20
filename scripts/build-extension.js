@@ -14,9 +14,10 @@ const distExtDir = path.resolve(rootDir, 'dist/extension');
 console.log('--- Building Voltrex Vault Browser Extension ---');
 
 // 1. Ensure clean target directory
-if (!fs.existsSync(distExtDir)) {
-  fs.mkdirSync(distExtDir, { recursive: true });
+if (fs.existsSync(distExtDir)) {
+  fs.rmSync(distExtDir, { recursive: true, force: true });
 }
+fs.mkdirSync(distExtDir, { recursive: true });
 
 // 2. Build popup with Vite
 console.log('1. Compiling Popup UI with Vite...');
@@ -25,11 +26,11 @@ execSync('npx vite build --config vite.extension.config.ts', {
   stdio: 'inherit',
 });
 
-// Rename index.html to popup.html if generated as index.html
+// Ensure popup.html is created from generated index.html
 const generatedHtml = path.join(distExtDir, 'index.html');
 const targetHtml = path.join(distExtDir, 'popup.html');
-if (fs.existsSync(generatedHtml) && !fs.existsSync(targetHtml)) {
-  fs.renameSync(generatedHtml, targetHtml);
+if (fs.existsSync(generatedHtml)) {
+  fs.copyFileSync(generatedHtml, targetHtml);
 }
 
 // 3. Bundle background service worker

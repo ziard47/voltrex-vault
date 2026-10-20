@@ -23,6 +23,7 @@ let gdriveService = null;
 let backupScheduler = null;
 let extensionBridge = null;
 const isDev = process.env.NODE_ENV === 'development' || !electron_1.app.isPackaged;
+electron_1.app.name = 'voltrex-vault';
 async function createWindow() {
     const userDataPath = electron_1.app.getPath('userData');
     if (!node_fs_1.default.existsSync(userDataPath)) {

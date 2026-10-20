@@ -30,6 +30,17 @@ export function resolveDefaultBridgeSocket(): string {
     // Linux standard XDG config home
     const xdgConfig = process.env.XDG_CONFIG_HOME || path.join(home, '.config');
     baseDir = path.join(xdgConfig, 'voltrex-vault');
+
+    const primaryPath = path.join(baseDir, 'voltrex_bridge.sock');
+    if (fs.existsSync(primaryPath)) {
+      return primaryPath;
+    }
+
+    // Dev fallback if Electron was launched without custom app.name
+    const devPath = path.join(xdgConfig, 'Electron', 'voltrex_bridge.sock');
+    if (fs.existsSync(devPath)) {
+      return devPath;
+    }
   }
 
   return path.join(baseDir, 'voltrex_bridge.sock');

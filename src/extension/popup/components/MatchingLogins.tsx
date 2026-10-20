@@ -13,6 +13,7 @@ interface MatchingLoginsProps {
   onCopyUsername: (username: string) => void;
   onCopyPassword: (loginId: string) => Promise<void>;
   isLoading: boolean;
+  onRefresh?: () => void;
 }
 
 export const MatchingLogins: React.FC<MatchingLoginsProps> = ({
@@ -25,6 +26,7 @@ export const MatchingLogins: React.FC<MatchingLoginsProps> = ({
   onCopyUsername,
   onCopyPassword,
   isLoading,
+  onRefresh,
 }) => {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -61,14 +63,39 @@ export const MatchingLogins: React.FC<MatchingLoginsProps> = ({
   // 1. Desktop app not running state
   if (!status.isAppRunning) {
     return (
-      <div className="p-6 text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#1e2316] border border-[#3E432E] flex items-center justify-center">
-          <ShieldAlert className="w-6 h-6 text-[#8e9c60]" />
+      <div className="p-4 flex flex-col items-center justify-center min-h-[360px] text-center">
+        <div className="w-full max-w-[320px] bg-[#12150e] border border-[#2e3422] rounded-xl p-5 shadow-lg flex flex-col items-center">
+          <div className="w-12 h-12 rounded-xl bg-[#1e2316] border border-[#616F39]/50 flex items-center justify-center mb-3">
+            <ShieldAlert className="w-6 h-6 text-[#A7D129]" />
+          </div>
+          <h2 className="text-sm font-semibold text-white mb-1.5">Desktop Vault Not Connected</h2>
+          <p className="text-xs text-[#a2a894] leading-relaxed mb-4">
+            Launch the Voltrex Vault desktop app and unlock your vault to access credentials on this page.
+          </p>
+
+          <div className="w-full bg-[#0a0c08] border border-[#23281a] rounded-lg p-2.5 text-left mb-4 space-y-1">
+            <div className="text-[10px] font-mono uppercase tracking-wider text-[#616F39]">Connection Checklist:</div>
+            <div className="text-[11px] text-neutral-300 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3E432E]" />
+              <span>1. Open Voltrex Vault desktop app</span>
+            </div>
+            <div className="text-[11px] text-neutral-300 flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#3E432E]" />
+              <span>2. Enter your master password</span>
+            </div>
+          </div>
+
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={isLoading}
+              className="w-full py-2 px-3 bg-[#202517] hover:bg-[#2d3420] border border-[#3E432E] hover:border-[#616F39] text-xs font-semibold text-white rounded-lg transition-all flex items-center justify-center gap-2"
+            >
+              <KeyRound className="w-3.5 h-3.5 text-[#A7D129]" />
+              <span>Check Connection</span>
+            </button>
+          )}
         </div>
-        <h2 className="text-sm font-semibold text-white mb-1">Voltrex Vault is closed</h2>
-        <p className="text-xs text-neutral-400 mb-4 leading-relaxed">
-          Launch the Voltrex Vault desktop application to connect and unlock your credentials.
-        </p>
       </div>
     );
   }
@@ -76,14 +103,26 @@ export const MatchingLogins: React.FC<MatchingLoginsProps> = ({
   // 2. Vault locked state
   if (!status.isUnlocked) {
     return (
-      <div className="p-6 text-center">
-        <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-[#1e2316] border border-[#3E432E] flex items-center justify-center">
-          <Lock className="w-6 h-6 text-amber-400" />
+      <div className="p-4 flex flex-col items-center justify-center min-h-[360px] text-center">
+        <div className="w-full max-w-[320px] bg-[#14130c] border border-[#423616] rounded-xl p-5 shadow-lg flex flex-col items-center">
+          <div className="w-12 h-12 rounded-xl bg-[#26200f] border border-amber-600/50 flex items-center justify-center mb-3">
+            <Lock className="w-6 h-6 text-amber-400" />
+          </div>
+          <h2 className="text-sm font-semibold text-white mb-1.5">Vault is Locked</h2>
+          <p className="text-xs text-[#a2a894] leading-relaxed mb-4">
+            Enter your master password in the Voltrex Vault desktop app to access your passwords.
+          </p>
+
+          {onRefresh && (
+            <button
+              onClick={onRefresh}
+              disabled={isLoading}
+              className="w-full py-2 px-3 bg-[#241f11] hover:bg-[#332c18] border border-amber-800/60 text-xs font-semibold text-amber-300 rounded-lg transition-all flex items-center justify-center gap-2"
+            >
+              <span>Refresh Vault Status</span>
+            </button>
+          )}
         </div>
-        <h2 className="text-sm font-semibold text-white mb-1">Vault is locked</h2>
-        <p className="text-xs text-neutral-400 mb-4 leading-relaxed">
-          Open the Voltrex Vault desktop app and enter your master password to access credentials.
-        </p>
       </div>
     );
   }
