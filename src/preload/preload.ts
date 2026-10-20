@@ -16,8 +16,8 @@ import {
   GoogleDriveStatus,
   RemoteBackupFile,
   RestoreComparison,
+  GeneratedPasswordResult,
 } from '../shared/types';
-import { GeneratedPasswordResult } from '../main/crypto/generator';
 
 async function invokeIpc<T>(channel: string, args?: unknown): Promise<T> {
   const response = await ipcRenderer.invoke(channel, args);

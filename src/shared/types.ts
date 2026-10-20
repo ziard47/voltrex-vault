@@ -112,10 +112,12 @@ export interface PasswordGeneratorOptions {
   excludeAmbiguous: boolean; // e.g. 0, O, o, 1, l, I
 }
 
+export type PasswordStrengthLabel = 'Weak' | 'Fair' | 'Good' | 'Strong' | 'Very Strong';
+
 export interface GeneratedPasswordResult {
   password: string;
   entropyBits: number;
-  strengthLabel: string;
+  strengthLabel: PasswordStrengthLabel;
 }
 
 export interface ExportData {

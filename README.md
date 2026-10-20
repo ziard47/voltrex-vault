@@ -1,6 +1,12 @@
-# Voltrex Vault (Phase 1 & Phase 2: Desktop Foundation & Encrypted Backups)
+# Voltrex Vault
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/voltrex/voltrex-vault/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
+[![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](tsconfig.json)
 
 Voltrex Vault is a free, open-source, local-first password and secrets manager built with **Electron**, **React**, **TypeScript (Strict Mode)**, **Vite**, **MUI**, **Tailwind CSS**, and **SQLite**.
+
+> **Documentation**: [Threat Model](docs/THREAT_MODEL.md) | [Architecture](docs/ARCHITECTURE.md) | [Security Policy](SECURITY.md) | [Contributing](CONTRIBUTING.md) | [License](LICENSE)
 
 ---
 
@@ -292,11 +298,13 @@ Voltrex Vault includes a companion Chromium extension (Chrome, Brave, Edge, Viva
 ### B. Installing & Registering the Browser Extension
 
 #### 1. Register the Native Messaging Host
-Register the host manifest `com.voltrex.vault.json` for installed Chromium browsers:
+Register the host manifest `com.voltrex.vault.json` for installed Chromium browsers (including both native packages and Flatpak installations on SteamOS / Linux):
 ```bash
 npm run register:host
 ```
 *Supported browsers: Google Chrome, Chromium, Brave, Microsoft Edge, Vivaldi.*
+
+> **SteamOS & Flatpak Note**: `register:host` automatically configures `flatpak-spawn --host` bridge manifests and permissions (`flatpak override --user --talk-name=org.freedesktop.Flatpak`) for sandboxed Flatpak browsers (e.g. Edge on Steam Deck). If you are using a Flatpak browser, completely close and reopen your browser once after running `register:host` for the new sandbox permissions to take effect.
 
 #### 2. Build the Extension
 ```bash

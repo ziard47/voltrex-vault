@@ -15,8 +15,8 @@ import {
   RemoteBackupFile,
   RestoreComparison,
   EncryptedBackupContainer,
+  GeneratedPasswordResult,
 } from '../../shared/types';
-import { GeneratedPasswordResult } from '../../main/crypto/generator';
 
 export type CategoryFilter = 'all' | EntryType | 'favorites' | 'trash';
 
