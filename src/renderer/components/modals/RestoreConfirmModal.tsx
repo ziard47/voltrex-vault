@@ -10,6 +10,8 @@ import {
   Lock,
 } from 'lucide-react';
 import { EncryptedBackupContainer, RestoreComparison } from '../../../shared/types';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
 
 export const RestoreConfirmModal: React.FC = () => {
   const {
@@ -229,14 +231,22 @@ export const RestoreConfirmModal: React.FC = () => {
                   <Lock className="w-3 h-3 text-vault-lime" />
                   <span>Backup Master Password</span>
                 </label>
-                <input
+                <TextField
+                  fullWidth
+                  size="small"
                   type="password"
                   required
                   autoFocus
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Enter the master password for this backup"
-                  className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <Lock className="w-3.5 h-3.5 text-vault-olive" />
+                      </InputAdornment>
+                    ),
+                  }}
                 />
                 <p className="text-[10px] text-vault-textMuted">
                   Required to derive the Key Encryption Key (Argon2id) and authenticate the container.

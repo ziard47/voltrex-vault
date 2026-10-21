@@ -1,6 +1,9 @@
 import React from 'react';
 import { useVault } from '../../context/VaultContext';
-import { Shield, Lock, Search, Minus, Square, X } from 'lucide-react';
+import { Lock, Search, Minus, Square, X } from 'lucide-react';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import logoUrl from '../../assets/logo.jpg';
 
 export const TitleBar: React.FC = () => {
   const {
@@ -17,9 +20,9 @@ export const TitleBar: React.FC = () => {
   return (
     <header className="h-10 bg-vault-black border-b border-vault-border flex items-center justify-between px-3 select-none app-draggable z-50">
       {/* Brand Header */}
-      <div className="flex items-center space-x-2 app-non-draggable">
-        <div className="w-5 h-5 rounded bg-vault-border flex items-center justify-center text-vault-lime">
-          <Shield className="w-3.5 h-3.5" />
+      <div className="flex items-center space-x-2.5 app-non-draggable">
+        <div className="w-6 h-6 rounded-md overflow-hidden border border-vault-border flex-shrink-0">
+          <img src={logoUrl} alt="Voltrex Vault" className="w-full h-full object-cover" />
         </div>
         <span className="text-xs font-bold tracking-wider text-vault-textPrimary uppercase">
           Voltrex <span className="text-vault-lime">Vault</span>
@@ -32,16 +35,25 @@ export const TitleBar: React.FC = () => {
       {/* Global Search (Active only when unlocked) */}
       {status.isUnlocked ? (
         <div className="flex-1 max-w-md mx-4 app-non-draggable">
-          <div className="relative flex items-center">
-            <Search className="w-3.5 h-3.5 text-vault-textSecondary absolute left-2.5 pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search vault (Ctrl+F)..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded pl-8 pr-3 py-1 text-vault-textPrimary placeholder-vault-textMuted focus:outline-none focus:border-vault-lime transition-colors"
-            />
-          </div>
+          <TextField
+            fullWidth
+            size="small"
+            placeholder="Search vault (Ctrl+F)..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search className="w-3.5 h-3.5 text-vault-textSecondary" />
+                </InputAdornment>
+              ),
+              sx: {
+                backgroundColor: '#0a0b08',
+                height: 28,
+                fontSize: '0.75rem',
+              },
+            }}
+          />
         </div>
       ) : (
         <div className="flex-1" />

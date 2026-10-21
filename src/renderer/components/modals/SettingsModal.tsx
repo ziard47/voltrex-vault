@@ -15,6 +15,13 @@ import {
   RotateCcw,
   User,
 } from 'lucide-react';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import TextField from '@mui/material/TextField';
+import logoUrl from '../../assets/logo.jpg';
 
 export const SettingsModal: React.FC = () => {
   const {
@@ -212,39 +219,41 @@ export const SettingsModal: React.FC = () => {
             </h4>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="border border-vault-border rounded p-3 bg-black space-y-1.5">
+              <div className="border border-vault-border rounded p-3 bg-black space-y-2">
                 <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Auto-Lock Inactivity Timeout
                 </label>
-                <select
-                  value={settings.autoLockMinutes}
-                  onChange={e => updateSettings({ autoLockMinutes: Number(e.target.value) })}
-                  className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-2.5 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
-                >
-                  <option value={1}>1 Minute</option>
-                  <option value={5}>5 Minutes</option>
-                  <option value={15}>15 Minutes (Default)</option>
-                  <option value={30}>30 Minutes</option>
-                  <option value={60}>1 Hour</option>
-                  <option value={0}>Disabled (Never Auto-Lock)</option>
-                </select>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={settings.autoLockMinutes}
+                    onChange={e => updateSettings({ autoLockMinutes: Number(e.target.value) })}
+                  >
+                    <MenuItem value={1}>1 Minute</MenuItem>
+                    <MenuItem value={5}>5 Minutes</MenuItem>
+                    <MenuItem value={15}>15 Minutes (Default)</MenuItem>
+                    <MenuItem value={30}>30 Minutes</MenuItem>
+                    <MenuItem value={60}>1 Hour</MenuItem>
+                    <MenuItem value={0}>Disabled (Never Auto-Lock)</MenuItem>
+                  </Select>
+                </FormControl>
                 <p className="text-[10px] text-vault-textMuted">Locks the database when user input stops.</p>
               </div>
 
-              <div className="border border-vault-border rounded p-3 bg-black space-y-1.5">
+              <div className="border border-vault-border rounded p-3 bg-black space-y-2">
                 <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Clipboard Auto-Clear
                 </label>
-                <select
-                  value={settings.clipboardClearSeconds}
-                  onChange={e => updateSettings({ clipboardClearSeconds: Number(e.target.value) })}
-                  className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-2.5 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
-                >
-                  <option value={15}>15 Seconds</option>
-                  <option value={30}>30 Seconds (Default)</option>
-                  <option value={60}>60 Seconds</option>
-                  <option value={120}>2 Minutes</option>
-                </select>
+                <FormControl fullWidth size="small">
+                  <Select
+                    value={settings.clipboardClearSeconds}
+                    onChange={e => updateSettings({ clipboardClearSeconds: Number(e.target.value) })}
+                  >
+                    <MenuItem value={15}>15 Seconds</MenuItem>
+                    <MenuItem value={30}>30 Seconds (Default)</MenuItem>
+                    <MenuItem value={60}>60 Seconds</MenuItem>
+                    <MenuItem value={120}>2 Minutes</MenuItem>
+                  </Select>
+                </FormControl>
                 <p className="text-[10px] text-vault-textMuted">Auto-clears copied credentials (best-effort).</p>
               </div>
             </div>
@@ -310,35 +319,36 @@ export const SettingsModal: React.FC = () => {
                 {/* Backup Settings */}
                 <div className="grid grid-cols-2 gap-3 pt-1">
                   <div className="space-y-1">
-                    <label className="flex items-center space-x-2 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={gdriveStatus.isAutoBackupEnabled}
-                        onChange={e => updateGDriveConfig({ isAutoBackupEnabled: e.target.checked })}
-                        className="rounded bg-[#0a0b08] border-vault-border text-vault-lime focus:ring-0"
-                      />
-                      <span className="text-xs text-vault-textPrimary font-medium">Automatic Backups</span>
-                    </label>
-                    <p className="text-[10px] text-vault-textMuted pl-5">
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={gdriveStatus.isAutoBackupEnabled}
+                          onChange={e => updateGDriveConfig({ isAutoBackupEnabled: e.target.checked })}
+                        />
+                      }
+                      label="Automatic Backups"
+                    />
+                    <p className="text-[10px] text-vault-textMuted pl-6">
                       Backs up automatically when vault changes occur.
                     </p>
                   </div>
 
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
+                    <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
                       Periodic Backup Interval
                     </label>
-                    <select
-                      value={gdriveStatus.intervalMinutes}
-                      onChange={e => updateGDriveConfig({ intervalMinutes: Number(e.target.value) })}
-                      className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-2.5 py-1 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
-                    >
-                      <option value={15}>Every 15 Minutes</option>
-                      <option value={30}>Every 30 Minutes (Default)</option>
-                      <option value={60}>Every 1 Hour</option>
-                      <option value={360}>Every 6 Hours</option>
-                      <option value={1440}>Every 24 Hours</option>
-                    </select>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={gdriveStatus.intervalMinutes}
+                        onChange={e => updateGDriveConfig({ intervalMinutes: Number(e.target.value) })}
+                      >
+                        <MenuItem value={15}>Every 15 Minutes</MenuItem>
+                        <MenuItem value={30}>Every 30 Minutes (Default)</MenuItem>
+                        <MenuItem value={60}>Every 1 Hour</MenuItem>
+                        <MenuItem value={360}>Every 6 Hours</MenuItem>
+                        <MenuItem value={1440}>Every 24 Hours</MenuItem>
+                      </Select>
+                    </FormControl>
                   </div>
                 </div>
 
@@ -474,45 +484,48 @@ export const SettingsModal: React.FC = () => {
                 </div>
               )}
 
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Current Master Password
                 </label>
-                <input
+                <TextField
+                  fullWidth
+                  size="small"
                   type="password"
                   required
                   value={currentPassword}
                   onChange={e => setCurrentPassword(e.target.value)}
                   placeholder="Enter current password"
-                  className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-3 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     New Master Password
                   </label>
-                  <input
+                  <TextField
+                    fullWidth
+                    size="small"
                     type="password"
                     required
                     value={newPassword}
                     onChange={e => setNewPassword(e.target.value)}
                     placeholder="Min 8 characters"
-                    className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-3 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     Confirm New Master Password
                   </label>
-                  <input
+                  <TextField
+                    fullWidth
+                    size="small"
                     type="password"
                     required
                     value={confirmNewPassword}
                     onChange={e => setConfirmNewPassword(e.target.value)}
                     placeholder="Repeat new password"
-                    className="w-full bg-[#0a0b08] border border-vault-border text-xs rounded px-3 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
                   />
                 </div>
               </div>
@@ -603,17 +616,20 @@ export const SettingsModal: React.FC = () => {
               )}
 
               <form onSubmit={handleExportPlainJson} className="flex items-center space-x-2">
-                <input
-                  type="password"
-                  required
-                  value={exportPassword}
-                  onChange={e => setExportPassword(e.target.value)}
-                  placeholder="Master password required for plain export"
-                  className="flex-1 bg-[#0a0b08] border border-vault-border text-xs rounded px-3 py-1.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime"
-                />
+                <div className="flex-1">
+                  <TextField
+                    fullWidth
+                    size="small"
+                    type="password"
+                    required
+                    value={exportPassword}
+                    onChange={e => setExportPassword(e.target.value)}
+                    placeholder="Master password required for plain export"
+                  />
+                </div>
                 <button
                   type="submit"
-                  className="py-1.5 px-3 bg-vault-border hover:bg-vault-olive text-vault-textPrimary text-xs rounded font-medium transition-colors flex items-center space-x-1.5 flex-shrink-0"
+                  className="py-2 px-3 bg-vault-border hover:bg-vault-olive text-vault-textPrimary text-xs rounded font-medium transition-colors flex items-center space-x-1.5 flex-shrink-0"
                 >
                   <Download className="w-3.5 h-3.5" />
                   <span>Export Plain JSON</span>
@@ -655,11 +671,24 @@ export const SettingsModal: React.FC = () => {
           </section>
 
           {/* System & Architecture Info */}
-          <section className="pt-3 border-t border-vault-border text-[11px] text-vault-textMuted space-y-1">
-            <p><strong>Storage Engine:</strong> SQLite via WebAssembly (sql.js) with 0600 file permissions</p>
-            <p><strong>Cryptography:</strong> AES-256-GCM + Argon2id (64 MiB, 3 iterations) + HKDF-SHA256</p>
-            <p><strong>Cloud Backup:</strong> Google Drive API (drive.file scope) + PKCE Installed App Flow</p>
-            <p><strong>Architecture:</strong> Local-first, zero telemetry, zero Voltrex cloud server dependency</p>
+          <section className="pt-3 border-t border-vault-border text-[11px] text-vault-textMuted space-y-3">
+            <div className="flex items-center space-x-3 bg-black/60 p-2.5 rounded border border-vault-border">
+              <img src={logoUrl} alt="Voltrex Vault" className="w-10 h-10 rounded-md object-cover border border-vault-border flex-shrink-0" />
+              <div>
+                <p className="text-xs font-bold text-vault-textPrimary uppercase tracking-wider">
+                  Voltrex Vault <span className="text-vault-lime text-[10px] font-mono font-normal">v1.0.0</span>
+                </p>
+                <p className="text-[10px] text-vault-textSecondary">
+                  Local-First Zero-Knowledge Password & Credential Vault
+                </p>
+              </div>
+            </div>
+            <div className="space-y-1">
+              <p><strong>Storage Engine:</strong> SQLite via WebAssembly (sql.js) with 0600 file permissions</p>
+              <p><strong>Cryptography:</strong> AES-256-GCM + Argon2id (64 MiB, 3 iterations) + HKDF-SHA256</p>
+              <p><strong>Cloud Backup:</strong> Google Drive API (drive.file scope) + PKCE Installed App Flow</p>
+              <p><strong>Architecture:</strong> Local-first, zero telemetry, zero Voltrex cloud server dependency</p>
+            </div>
           </section>
         </div>
       </div>

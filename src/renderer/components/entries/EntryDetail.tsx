@@ -15,10 +15,10 @@ import {
   Eye,
   EyeOff,
   ExternalLink,
-  Shield,
   Tag,
   Clock,
 } from 'lucide-react';
+import logoUrl from '../../assets/logo.jpg';
 
 export const EntryDetail: React.FC = () => {
   const {
@@ -35,10 +35,10 @@ export const EntryDetail: React.FC = () => {
   if (!selectedEntry) {
     return (
       <div className="flex-1 bg-[#050604] flex flex-col items-center justify-center text-vault-textMuted p-8 select-none">
-        <div className="w-12 h-12 rounded bg-vault-surface border border-vault-border flex items-center justify-center mb-3 text-vault-olive">
-          <Shield className="w-6 h-6" />
+        <div className="w-16 h-16 rounded-xl overflow-hidden border border-vault-border mb-3 shadow-md shadow-vault-lime/5">
+          <img src={logoUrl} alt="Voltrex Vault" className="w-full h-full object-cover" />
         </div>
-        <p className="text-sm font-medium text-vault-textSecondary">No item selected</p>
+        <p className="text-sm font-semibold text-vault-textSecondary uppercase tracking-wider">No item selected</p>
         <p className="text-xs text-vault-textMuted mt-1">Select an entry from the list to inspect details</p>
       </div>
     );

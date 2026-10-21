@@ -9,6 +9,9 @@ import {
   UserCheck,
   Dna,
 } from 'lucide-react';
+import TextField from '@mui/material/TextField';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 export const EntryModal: React.FC = () => {
   const {
@@ -250,51 +253,51 @@ export const EntryModal: React.FC = () => {
           )}
 
           {/* Title */}
-          <div>
-            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
               Title *
             </label>
-            <input
-              type="text"
+            <TextField
+              fullWidth
+              size="small"
               required
               value={title}
               onChange={e => setTitle(e.target.value)}
               placeholder="e.g. GitHub, Work WiFi, Personal ID"
-              className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
             />
           </div>
 
           {/* Login Fields */}
           {type === 'login' && (
             <div className="space-y-3 pt-1">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Website URL
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={url}
                   onChange={e => setUrl(e.target.value)}
                   placeholder="https://example.com"
-                  className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Username or Email
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={username}
                   onChange={e => setUsername(e.target.value)}
                   placeholder="user@example.com"
-                  className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1">
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
                   <label className="text-[10px] uppercase tracking-wider text-vault-textMuted font-semibold">
                     Password
                   </label>
@@ -307,12 +310,13 @@ export const EntryModal: React.FC = () => {
                     <span>Generate Secure</span>
                   </button>
                 </div>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={password}
                   onChange={e => setPassword(e.target.value)}
                   placeholder="Enter or generate password"
-                  className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+                  inputProps={{ style: { fontFamily: 'monospace' } }}
                 />
               </div>
             </div>
@@ -320,16 +324,18 @@ export const EntryModal: React.FC = () => {
 
           {/* Note Fields */}
           {type === 'note' && (
-            <div className="pt-1">
-              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+            <div className="pt-1 space-y-1">
+              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                 Note Content
               </label>
-              <textarea
+              <TextField
+                fullWidth
+                multiline
                 rows={6}
                 value={content}
                 onChange={e => setContent(e.target.value)}
                 placeholder="Secure markdown notes, recovery keys, server configurations..."
-                className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors resize-none leading-relaxed"
+                inputProps={{ style: { fontFamily: 'monospace' } }}
               />
             </div>
           )}
@@ -337,70 +343,71 @@ export const EntryModal: React.FC = () => {
           {/* Card Fields */}
           {type === 'card' && (
             <div className="space-y-3 pt-1">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Cardholder Name
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={cardholderName}
                   onChange={e => setCardholderName(e.target.value)}
                   placeholder="John Doe"
-                  className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                 />
               </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Card Number
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={cardNumber}
                   onChange={e => setCardNumber(e.target.value)}
                   placeholder="4000 1234 5678 9010"
-                  className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+                  inputProps={{ style: { fontFamily: 'monospace' } }}
                 />
               </div>
 
               <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     Month
                   </label>
-                  <input
-                    type="text"
-                    maxLength={2}
+                  <TextField
+                    fullWidth
+                    size="small"
                     value={expirationMonth}
                     onChange={e => setExpirationMonth(e.target.value)}
                     placeholder="12"
-                    className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+                    inputProps={{ maxLength: 2, style: { fontFamily: 'monospace' } }}
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     Year
                   </label>
-                  <input
-                    type="text"
-                    maxLength={4}
+                  <TextField
+                    fullWidth
+                    size="small"
                     value={expirationYear}
                     onChange={e => setExpirationYear(e.target.value)}
                     placeholder="2028"
-                    className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+                    inputProps={{ maxLength: 4, style: { fontFamily: 'monospace' } }}
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     CVV
                   </label>
-                  <input
-                    type="text"
-                    maxLength={4}
+                  <TextField
+                    fullWidth
+                    size="small"
                     value={cvv}
                     onChange={e => setCvv(e.target.value)}
                     placeholder="123"
-                    className="w-full bg-black border border-vault-border text-xs font-mono rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+                    inputProps={{ maxLength: 4, style: { fontFamily: 'monospace' } }}
                   />
                 </div>
               </div>
@@ -410,56 +417,56 @@ export const EntryModal: React.FC = () => {
           {/* Identity Fields */}
           {type === 'identity' && (
             <div className="space-y-3 pt-1">
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Full Name
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={fullName}
                   onChange={e => setFullName(e.target.value)}
                   placeholder="Jane Doe"
-                  className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     Email
                   </label>
-                  <input
-                    type="text"
+                  <TextField
+                    fullWidth
+                    size="small"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
                     placeholder="jane@example.com"
-                    className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                   />
                 </div>
-                <div>
-                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                     Phone
                   </label>
-                  <input
-                    type="text"
+                  <TextField
+                    fullWidth
+                    size="small"
                     value={phone}
                     onChange={e => setPhone(e.target.value)}
                     placeholder="+1 555-0199"
-                    className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                   Physical Address
                 </label>
-                <input
-                  type="text"
+                <TextField
+                  fullWidth
+                  size="small"
                   value={address}
                   onChange={e => setAddress(e.target.value)}
                   placeholder="123 Market St, Suite 400"
-                  className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
                 />
               </div>
             </div>
@@ -467,41 +474,42 @@ export const EntryModal: React.FC = () => {
 
           {/* Tags & Favorite */}
           <div className="pt-2 border-t border-vault-border space-y-3">
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                 Tags (comma separated)
               </label>
-              <input
-                type="text"
+              <TextField
+                fullWidth
+                size="small"
                 value={tagsInput}
                 onChange={e => setTagsInput(e.target.value)}
                 placeholder="personal, banking, work"
-                className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
               />
             </div>
 
-            <div>
-              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
                 Internal Notes
               </label>
-              <textarea
+              <TextField
+                fullWidth
+                multiline
                 rows={2}
                 value={notes}
                 onChange={e => setNotes(e.target.value)}
                 placeholder="Additional notes or security hints..."
-                className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors resize-none"
               />
             </div>
 
-            <label className="flex items-center space-x-2 text-xs text-vault-textSecondary cursor-pointer pt-1">
-              <input
-                type="checkbox"
-                checked={isFavorite}
-                onChange={e => setIsFavorite(e.target.checked)}
-                className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
-              />
-              <span>Add to Favorites</span>
-            </label>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isFavorite}
+                  onChange={e => setIsFavorite(e.target.checked)}
+                />
+              }
+              label="Add to Favorites"
+            />
           </div>
 
           {/* Actions */}

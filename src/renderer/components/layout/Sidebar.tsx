@@ -12,6 +12,7 @@ import {
   Dna,
   Settings as SettingsIcon,
 } from 'lucide-react';
+import logoUrl from '../../assets/logo.jpg';
 
 export const Sidebar: React.FC = () => {
   const {
@@ -55,6 +56,21 @@ export const Sidebar: React.FC = () => {
   return (
     <aside className="w-60 bg-[#080906] border-r border-vault-border flex flex-col justify-between select-none">
       <div className="p-3 space-y-3">
+        {/* Brand Banner */}
+        <div className="flex items-center space-x-2.5 px-1 py-0.5">
+          <div className="w-7 h-7 rounded-md overflow-hidden border border-vault-border flex-shrink-0 shadow-sm">
+            <img src={logoUrl} alt="Voltrex Vault" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex flex-col min-w-0">
+            <span className="text-[11px] font-bold tracking-wider text-vault-textPrimary uppercase leading-tight truncate">
+              Voltrex <span className="text-vault-lime">Vault</span>
+            </span>
+            <span className="text-[9px] text-vault-textMuted tracking-wide">
+              Zero-Knowledge Security
+            </span>
+          </div>
+        </div>
+
         {/* Create Item Button */}
         <button
           onClick={() => openCreateModal()}

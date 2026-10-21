@@ -2,6 +2,9 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useVault } from '../../context/VaultContext';
 import { PasswordGeneratorOptions } from '../../../shared/types';
 import { X, RefreshCw, Copy, ShieldCheck } from 'lucide-react';
+import Slider from '@mui/material/Slider';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 export const PasswordGeneratorModal: React.FC = () => {
   const { isGeneratorOpen, closeGenerator, generatePassword, copyToClipboard } = useVault();
@@ -122,71 +125,73 @@ export const PasswordGeneratorModal: React.FC = () => {
           <div className="space-y-4 pt-2 border-t border-vault-border">
             {/* Length Slider */}
             <div>
-              <div className="flex items-center justify-between text-xs mb-1.5">
+              <div className="flex items-center justify-between text-xs mb-1">
                 <span className="text-vault-textSecondary">Length</span>
                 <span className="font-mono text-vault-lime font-bold">{length}</span>
               </div>
-              <input
-                type="range"
+              <Slider
                 min={8}
                 max={64}
                 value={length}
-                onChange={e => setLength(Number(e.target.value))}
-                className="w-full accent-vault-lime bg-vault-border rounded h-1 cursor-pointer"
+                onChange={(_, val) => setLength(val as number)}
+                valueLabelDisplay="auto"
+                sx={{ py: 1 }}
               />
             </div>
 
             {/* Checkbox Options */}
-            <div className="grid grid-cols-2 gap-2.5 text-xs text-vault-textSecondary">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeUppercase}
-                  onChange={e => setIncludeUppercase(e.target.checked)}
-                  className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
-                />
-                <span>Uppercase (A-Z)</span>
-              </label>
+            <div className="grid grid-cols-2 gap-x-2 gap-y-1">
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeUppercase}
+                    onChange={e => setIncludeUppercase(e.target.checked)}
+                  />
+                }
+                label="Uppercase (A-Z)"
+              />
 
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeLowercase}
-                  onChange={e => setIncludeLowercase(e.target.checked)}
-                  className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
-                />
-                <span>Lowercase (a-z)</span>
-              </label>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeLowercase}
+                    onChange={e => setIncludeLowercase(e.target.checked)}
+                  />
+                }
+                label="Lowercase (a-z)"
+              />
 
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeNumbers}
-                  onChange={e => setIncludeNumbers(e.target.checked)}
-                  className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
-                />
-                <span>Numbers (0-9)</span>
-              </label>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeNumbers}
+                    onChange={e => setIncludeNumbers(e.target.checked)}
+                  />
+                }
+                label="Numbers (0-9)"
+              />
 
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={includeSymbols}
-                  onChange={e => setIncludeSymbols(e.target.checked)}
-                  className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
-                />
-                <span>Symbols (!@#$%)</span>
-              </label>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={includeSymbols}
+                    onChange={e => setIncludeSymbols(e.target.checked)}
+                  />
+                }
+                label="Symbols (!@#$%)"
+              />
 
-              <label className="flex items-center space-x-2 col-span-2 cursor-pointer pt-1">
-                <input
-                  type="checkbox"
-                  checked={excludeAmbiguous}
-                  onChange={e => setExcludeAmbiguous(e.target.checked)}
-                  className="rounded border-vault-border text-vault-lime focus:ring-0 bg-black"
+              <div className="col-span-2">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={excludeAmbiguous}
+                      onChange={e => setExcludeAmbiguous(e.target.checked)}
+                    />
+                  }
+                  label="Exclude Ambiguous (0, O, 1, l, I)"
                 />
-                <span>Exclude Ambiguous Characters (0, O, 1, l, I)</span>
-              </label>
+              </div>
             </div>
           </div>
 

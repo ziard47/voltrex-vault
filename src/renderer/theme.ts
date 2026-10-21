@@ -102,27 +102,132 @@ export const vaultTheme = createTheme({
         },
       },
     },
-    MuiInputBase: {
+    MuiCheckbox: {
+      defaultProps: {
+        size: 'small',
+      },
       styleOverrides: {
         root: {
-          backgroundColor: '#000000',
-          border: '1px solid #3E432E',
-          borderRadius: 4,
-          color: '#f4f6f0',
-          fontSize: '0.875rem',
-          '&.Mui-focused': {
-            borderColor: '#A7D129',
+          color: '#616F39',
+          padding: 4,
+          '&.Mui-checked': {
+            color: '#A7D129',
+          },
+          '&.Mui-disabled': {
+            color: '#3E432E',
           },
         },
-        input: {
-          padding: '8px 12px',
+      },
+    },
+    MuiSlider: {
+      styleOverrides: {
+        root: {
+          color: '#A7D129',
+          height: 4,
+        },
+        thumb: {
+          width: 14,
+          height: 14,
+          backgroundColor: '#A7D129',
+          '&:focus, &:hover, &.Mui-active, &.Mui-focusVisible': {
+            boxShadow: '0 0 0 8px rgba(167, 209, 41, 0.16)',
+          },
+        },
+        rail: {
+          backgroundColor: '#3E432E',
+          opacity: 1,
+        },
+        track: {
+          backgroundColor: '#A7D129',
+          border: 'none',
+        },
+      },
+    },
+    MuiSelect: {
+      defaultProps: {
+        size: 'small',
+      },
+      styleOverrides: {
+        root: {
+          backgroundColor: '#0a0b08',
+          color: '#f4f6f0',
+          fontSize: '0.75rem',
+        },
+        icon: {
+          color: '#A7D129',
+        },
+      },
+    },
+    MuiMenu: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: '#0c0d0a !important',
+          border: '1px solid #3E432E !important',
+          borderRadius: 4,
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.8) !important',
+        },
+        list: {
+          padding: 4,
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: '0.75rem',
+          color: '#f4f6f0',
+          borderRadius: 3,
+          margin: '2px 0',
+          padding: '6px 10px',
+          '&:hover': {
+            backgroundColor: '#1b2013',
+            color: '#ffffff',
+          },
+          '&.Mui-selected': {
+            backgroundColor: '#273114 !important',
+            color: '#A7D129',
+            fontWeight: 600,
+            '&:hover': {
+              backgroundColor: '#303c19 !important',
+            },
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          color: '#a2a894',
+          fontSize: '0.75rem',
+          '&.Mui-focused': {
+            color: '#A7D129',
+          },
+        },
+      },
+    },
+    MuiFormControlLabel: {
+      styleOverrides: {
+        root: {
+          marginLeft: -4,
+          marginRight: 8,
+        },
+        label: {
+          fontSize: '0.75rem',
+          color: '#f4f6f0',
+          userSelect: 'none',
         },
       },
     },
     MuiOutlinedInput: {
+      defaultProps: {
+        size: 'small',
+      },
       styleOverrides: {
         root: {
           backgroundColor: '#000000',
+          fontSize: '0.75rem',
+          color: '#f4f6f0',
+          borderRadius: 4,
           '& .MuiOutlinedInput-notchedOutline': {
             borderColor: '#3E432E',
           },
@@ -132,6 +237,12 @@ export const vaultTheme = createTheme({
           '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
             borderColor: '#A7D129',
             borderWidth: 1,
+          },
+          '& input': {
+            padding: '7px 10px',
+          },
+          '& textarea': {
+            padding: '4px 2px',
           },
         },
       },

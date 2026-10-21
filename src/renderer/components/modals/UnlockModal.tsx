@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useVault } from '../../context/VaultContext';
 import { Shield, Lock, Eye, EyeOff } from 'lucide-react';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import logoUrl from '../../assets/logo.jpg';
 
 export const UnlockModal: React.FC = () => {
   const { status, unlockVault, isLoading } = useVault();
@@ -30,18 +34,24 @@ export const UnlockModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50 select-none">
-      <div className="bg-[#0c0d0a] border border-vault-border rounded w-full max-w-sm p-6 space-y-6 shadow-2xl">
+      <div className="bg-[#0c0d0a] border border-vault-border rounded-lg w-full max-w-sm p-6 space-y-6 shadow-2xl">
         {/* Brand & Lock Header */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded bg-vault-border/50 border border-vault-border flex items-center justify-center mx-auto text-vault-lime">
-            <Lock className="w-6 h-6" />
+        <div className="text-center space-y-3">
+          <div className="relative mx-auto w-20 h-20 rounded-xl overflow-hidden border border-vault-border shadow-lg shadow-vault-lime/5">
+            <img
+              src={logoUrl}
+              alt="Voltrex Vault Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h2 className="text-base font-bold text-vault-textPrimary uppercase tracking-wider">
-            Vault is Locked
-          </h2>
-          <p className="text-xs text-vault-textSecondary">
-            Enter master password to decrypt your credentials.
-          </p>
+          <div>
+            <h2 className="text-base font-bold text-vault-textPrimary uppercase tracking-wider">
+              Vault is Locked
+            </h2>
+            <p className="text-xs text-vault-textSecondary mt-1">
+              Enter master password to decrypt your credentials.
+            </p>
+          </div>
         </div>
 
         {/* Unlock Form */}
@@ -53,24 +63,35 @@ export const UnlockModal: React.FC = () => {
           )}
 
           <div>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                autoFocus
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Master Password"
-                className="w-full bg-black border border-vault-border text-xs rounded pl-3 pr-9 py-2.5 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-3 text-vault-textSecondary hover:text-vault-textPrimary"
-              >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
-            </div>
+            <TextField
+              fullWidth
+              size="small"
+              type={showPassword ? 'text' : 'password'}
+              autoFocus
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Master Password"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock className="w-4 h-4 text-vault-olive" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{ color: '#a2a894', '&:hover': { color: '#A7D129' } }}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
           </div>
 
           <button

@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useVault } from '../../context/VaultContext';
-import { Shield, AlertTriangle, Eye, EyeOff } from 'lucide-react';
+import { AlertTriangle, Eye, EyeOff, Lock } from 'lucide-react';
+import TextField from '@mui/material/TextField';
+import InputAdornment from '@mui/material/InputAdornment';
+import IconButton from '@mui/material/IconButton';
+import logoUrl from '../../assets/logo.jpg';
 
 export const SetupModal: React.FC = () => {
   const { status, setupVault, isLoading } = useVault();
@@ -50,24 +54,30 @@ export const SetupModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50 select-none">
-      <div className="bg-[#0c0d0a] border border-vault-border rounded w-full max-w-md p-6 space-y-6 shadow-2xl">
+      <div className="bg-[#0c0d0a] border border-vault-border rounded-lg w-full max-w-md p-6 space-y-5 shadow-2xl">
         {/* Brand & Setup Header */}
-        <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded bg-vault-border/50 border border-vault-border flex items-center justify-center mx-auto text-vault-lime">
-            <Shield className="w-6 h-6" />
+        <div className="text-center space-y-3">
+          <div className="relative mx-auto w-20 h-20 rounded-xl overflow-hidden border border-vault-border shadow-lg shadow-vault-lime/5">
+            <img
+              src={logoUrl}
+              alt="Voltrex Vault Logo"
+              className="w-full h-full object-cover"
+            />
           </div>
-          <h2 className="text-base font-bold text-vault-textPrimary uppercase tracking-wider">
-            Create Your Vault
-          </h2>
-          <p className="text-xs text-vault-textSecondary">
-            Set a master password to encrypt your local database.
-          </p>
+          <div>
+            <h2 className="text-base font-bold text-vault-textPrimary uppercase tracking-wider">
+              Create Your Vault
+            </h2>
+            <p className="text-xs text-vault-textSecondary mt-1">
+              Set a master password to initialize and encrypt your local database.
+            </p>
+          </div>
         </div>
 
         {/* Security Alert Banner */}
         <div className="p-3 bg-[#131109] border border-vault-warning/30 rounded flex items-start space-x-2.5 text-xs text-vault-textSecondary">
           <AlertTriangle className="w-4 h-4 text-vault-warning flex-shrink-0 mt-0.5" />
-          <p className="leading-relaxed">
+          <p className="leading-relaxed text-[11px]">
             <strong className="text-vault-textPrimary">Zero-Knowledge Security:</strong> Your data is encrypted locally using Argon2id and AES-256-GCM. We never store or transmit your master password. If lost, it cannot be recovered.
           </p>
         </div>
@@ -80,27 +90,38 @@ export const SetupModal: React.FC = () => {
             </div>
           )}
 
-          <div>
-            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
               Master Password *
             </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                required
-                value={password}
-                onChange={e => setPassword(e.target.value)}
-                placeholder="Minimum 8 characters"
-                className="w-full bg-black border border-vault-border text-xs rounded pl-3 pr-9 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2.5 top-2.5 text-vault-textSecondary hover:text-vault-textPrimary"
-              >
-                {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
-              </button>
-            </div>
+            <TextField
+              fullWidth
+              size="small"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="Minimum 8 characters"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock className="w-4 h-4 text-vault-olive" />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                      sx={{ color: '#a2a894', '&:hover': { color: '#A7D129' } }}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
 
             {/* Strength meter */}
             {password.length > 0 && (
@@ -119,24 +140,32 @@ export const SetupModal: React.FC = () => {
             )}
           </div>
 
-          <div>
-            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold mb-1">
+          <div className="space-y-1">
+            <label className="text-[10px] uppercase tracking-wider text-vault-textMuted block font-semibold">
               Confirm Master Password *
             </label>
-            <input
+            <TextField
+              fullWidth
+              size="small"
               type={showPassword ? 'text' : 'password'}
               required
               value={confirmPassword}
               onChange={e => setConfirmPassword(e.target.value)}
               placeholder="Re-enter master password"
-              className="w-full bg-black border border-vault-border text-xs rounded px-3 py-2 text-vault-textPrimary focus:outline-none focus:border-vault-lime transition-colors"
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock className="w-4 h-4 text-vault-olive" />
+                  </InputAdornment>
+                ),
+              }}
             />
           </div>
 
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2.5 px-4 bg-vault-lime hover:bg-vault-limeHover disabled:opacity-50 text-black font-semibold text-xs rounded transition-colors uppercase tracking-wider"
+            className="w-full py-2.5 px-4 bg-vault-lime hover:bg-vault-limeHover disabled:opacity-50 text-black font-semibold text-xs rounded transition-colors uppercase tracking-wider mt-2"
           >
             {isLoading ? 'Deriving Keys & Initializing...' : 'Create Vault'}
           </button>
