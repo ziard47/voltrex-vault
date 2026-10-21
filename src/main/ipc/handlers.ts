@@ -6,8 +6,6 @@
 import { ipcMain, BrowserWindow, IpcMainInvokeEvent } from 'electron';
 import { VaultService } from '../services/vault-service';
 import { ClipboardManager } from '../clipboard/manager';
-import { GoogleDriveService } from '../services/gdrive-service';
-import { BackupScheduler } from '../services/backup-scheduler';
 import { UpdateService } from '../services/update-service';
 import { generateSecurePassword } from '../crypto/generator';
 import {
@@ -29,8 +27,6 @@ import {
 export function registerIpcHandlers(
   vaultService: VaultService,
   clipboardManager: ClipboardManager,
-  gdriveService: GoogleDriveService,
-  backupScheduler: BackupScheduler,
   updateService: UpdateService,
   getMainWindow: () => BrowserWindow | null
 ): void {
@@ -152,8 +148,7 @@ export function registerIpcHandlers(
   });
 
   handle('vault:import', (_event, { data }: { data: unknown }) => {
-    const validated = validateExportData(data);
-    return vaultService.importVault(validated);
+    return vaultService.importVault(data);
   });
 
   // --- Generator & Clipboard ---
@@ -169,53 +164,14 @@ export function registerIpcHandlers(
     return true;
   });
 
-  // --- Google Drive & Encrypted Backup ---
-  handle('gdrive:get-status', () => {
-    return backupScheduler.getStatus();
-  });
-
-  handle('gdrive:connect', async () => {
-    return await gdriveService.connect();
-  });
-
-  handle('gdrive:disconnect', async () => {
-    await gdriveService.disconnect();
-    return backupScheduler.getStatus();
-  });
-
-  handle('gdrive:backup-now', async () => {
-    return await backupScheduler.backupNow();
-  });
-
-  handle('gdrive:list-backups', async () => {
-    return await backupScheduler.listRemoteBackups();
-  });
-
-  handle('gdrive:inspect-backup', async (_event, { fileId }: { fileId: unknown }) => {
-    const id = validateString(fileId, 'fileId', 1, 200);
-    return await backupScheduler.inspectRemoteBackup(id);
-  });
-
-  handle('gdrive:restore-backup', async (_event, { fileId, masterPassword }: { fileId: unknown; masterPassword: unknown }) => {
-    const id = validateString(fileId, 'fileId', 1, 200);
-    const pwd = validateString(masterPassword, 'masterPassword', 1, 500);
-    return await backupScheduler.restoreRemoteBackup(id, pwd);
-  });
-
-  handle('gdrive:update-config', (_event, { config }: { config: unknown }) => {
-    if (!config || typeof config !== 'object') {
-      throw new ValidationError('Config must be an object.');
-    }
-    return backupScheduler.updateConfig(config as any);
-  });
-
+  // --- Encrypted Backup Container (.voltrex) ---
   handle('backup:create-container', () => {
     return vaultService.createBackup();
   });
 
   handle('backup:restore-container', async (_event, { container, masterPassword }: { container: unknown; masterPassword: unknown }) => {
     const pwd = validateString(masterPassword, 'masterPassword', 1, 500);
-    return await backupScheduler.restoreContainer(container as any, pwd);
+    return await vaultService.restoreContainer(container as any, pwd);
   });
 
   // --- Window Controls ---

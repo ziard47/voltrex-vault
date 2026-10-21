@@ -33,7 +33,7 @@ export const UnlockModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black flex items-center justify-center p-4 z-50 select-none">
+    <div className="fixed top-10 inset-x-0 bottom-0 bg-black flex items-center justify-center p-4 z-40 select-none">
       <div className="bg-[#0c0d0a] border border-vault-border rounded-lg w-full max-w-sm p-6 space-y-6 shadow-2xl">
         {/* Brand & Lock Header */}
         <div className="text-center space-y-3">

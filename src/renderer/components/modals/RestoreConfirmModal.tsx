@@ -17,14 +17,11 @@ export const RestoreConfirmModal: React.FC = () => {
   const {
     restoreTarget,
     closeRestoreModal,
-    inspectRemoteBackup,
-    restoreRemoteBackup,
     restoreEncryptedBackup,
   } = useVault();
 
   const [password, setPassword] = useState('');
   const [container, setContainer] = useState<EncryptedBackupContainer | null>(null);
-  const [isInspecting, setIsInspecting] = useState(false);
   const [isRestoring, setIsRestoring] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [restoreSuccess, setRestoreSuccess] = useState<RestoreComparison | null>(null);
@@ -44,20 +41,6 @@ export const RestoreConfirmModal: React.FC = () => {
 
   if (!restoreTarget) return null;
 
-  const handleInspect = async () => {
-    if (!restoreTarget.fileId) return;
-    setIsInspecting(true);
-    setError(null);
-    try {
-      const inspected = await inspectRemoteBackup(restoreTarget.fileId);
-      setContainer(inspected);
-    } catch (err: any) {
-      setError(err.message || 'Failed to inspect remote backup container.');
-    } finally {
-      setIsInspecting(false);
-    }
-  };
-
   const handleConfirmRestore = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!password) {
@@ -69,14 +52,10 @@ export const RestoreConfirmModal: React.FC = () => {
     setError(null);
 
     try {
-      let comparison: RestoreComparison;
-      if (restoreTarget.fileId) {
-        comparison = await restoreRemoteBackup(restoreTarget.fileId, password);
-      } else if (restoreTarget.container) {
-        comparison = await restoreEncryptedBackup(restoreTarget.container, password);
-      } else {
+      if (!restoreTarget.container) {
         throw new Error('No valid backup target specified.');
       }
+      const comparison = await restoreEncryptedBackup(restoreTarget.container, password);
       setRestoreSuccess(comparison);
     } catch (err: any) {
       setError(err.message || 'Failed to restore backup. Check that the master password is correct.');
@@ -159,16 +138,6 @@ export const RestoreConfirmModal: React.FC = () => {
                     </div>
                   )}
                 </div>
-                {restoreTarget.fileId && !container && (
-                  <button
-                    type="button"
-                    onClick={handleInspect}
-                    disabled={isInspecting}
-                    className="py-1 px-2.5 bg-vault-border hover:bg-vault-olive text-vault-textPrimary text-[11px] rounded transition-colors disabled:opacity-50"
-                  >
-                    {isInspecting ? 'Inspecting...' : 'Inspect Metadata'}
-                  </button>
-                )}
               </div>
 
               {/* Inspected Container Details */}

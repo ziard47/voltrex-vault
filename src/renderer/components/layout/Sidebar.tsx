@@ -13,7 +13,6 @@ import {
   Settings as SettingsIcon,
   Sparkles,
 } from "lucide-react";
-import logoUrl from "../../assets/logo.jpg";
 
 export const Sidebar: React.FC = () => {
   const {

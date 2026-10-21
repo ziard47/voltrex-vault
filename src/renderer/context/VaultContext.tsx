@@ -11,8 +11,6 @@ import {
   VaultStatus,
   EntryType,
   ExportData,
-  GoogleDriveStatus,
-  RemoteBackupFile,
   RestoreComparison,
   EncryptedBackupContainer,
   GeneratedPasswordResult,
@@ -30,7 +28,6 @@ interface ToastNotification {
 }
 
 export interface RestoreTarget {
-  fileId?: string;
   container?: EncryptedBackupContainer;
   fileName: string;
   sizeBytes?: number;
@@ -46,11 +43,6 @@ interface VaultContextType {
   settings: VaultSettings;
   isLoading: boolean;
   toasts: ToastNotification[];
-
-  // Google Drive & Backups state
-  gdriveStatus: GoogleDriveStatus;
-  remoteBackups: RemoteBackupFile[];
-  isGDriveLoading: boolean;
 
   // Modal triggers
   isEntryModalOpen: boolean;
@@ -81,17 +73,9 @@ interface VaultContextType {
   copyToClipboard: (text: string, label?: string) => Promise<void>;
   updateSettings: (newSettings: Partial<VaultSettings>) => Promise<void>;
 
-  // Google Drive & Backup actions
-  refreshGDriveStatus: () => Promise<void>;
-  connectGDrive: () => Promise<void>;
-  disconnectGDrive: () => Promise<void>;
-  backupNowGDrive: () => Promise<void>;
-  loadRemoteBackups: () => Promise<RemoteBackupFile[]>;
-  inspectRemoteBackup: (fileId: string) => Promise<EncryptedBackupContainer>;
-  restoreRemoteBackup: (fileId: string, masterPassword: string) => Promise<RestoreComparison>;
+  // Encrypted Backup Container actions
   createEncryptedBackup: () => Promise<EncryptedBackupContainer>;
   restoreEncryptedBackup: (container: EncryptedBackupContainer, masterPassword: string) => Promise<RestoreComparison>;
-  updateGDriveConfig: (config: { isAutoBackupEnabled?: boolean; intervalMinutes?: number; retentionCount?: number; clientId?: string }) => Promise<void>;
 
   // Modal controls
   openCreateModal: (type?: EntryType) => void;
@@ -130,20 +114,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isLoading, setIsLoading] = useState(true);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
 
-  // Google Drive & Backup State
-  const [gdriveStatus, setGdriveStatus] = useState<GoogleDriveStatus>({
-    isConnected: false,
-    account: null,
-    clientId: '',
-    isAutoBackupEnabled: true,
-    intervalMinutes: 30,
-    retentionCount: 10,
-    lastBackupAt: null,
-    lastBackupStatus: 'idle',
-    lastError: null,
-  });
-  const [remoteBackups, setRemoteBackups] = useState<RemoteBackupFile[]>([]);
-  const [isGDriveLoading, setIsGDriveLoading] = useState(false);
+  // Backup State
   const [restoreTarget, setRestoreTarget] = useState<RestoreTarget | null>(null);
 
   // Modals
@@ -173,15 +144,6 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const dismissToast = useCallback((id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
-  }, []);
-
-  const refreshGDriveStatus = useCallback(async () => {
-    try {
-      const gStatus = await window.vaultApi.gdrive.getStatus();
-      setGdriveStatus(gStatus);
-    } catch {
-      // safe ignore
-    }
   }, []);
 
   const refreshStatus = useCallback(async () => {
@@ -478,90 +440,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return true;
   });
 
-  // --- Google Drive & Encrypted Backups Actions ---
-  const loadRemoteBackups = useCallback(async (): Promise<RemoteBackupFile[]> => {
-    try {
-      setIsGDriveLoading(true);
-      const list = await window.vaultApi.gdrive.listBackups();
-      setRemoteBackups(list);
-      return list;
-    } catch (err: any) {
-      addToast(err.message || 'Failed to list Google Drive backups.', 'error');
-      return [];
-    } finally {
-      setIsGDriveLoading(false);
-    }
-  }, [addToast]);
-
-  const connectGDrive = async () => {
-    setIsGDriveLoading(true);
-    try {
-      const updated = await window.vaultApi.gdrive.connect();
-      setGdriveStatus(updated);
-      addToast(`Google Drive connected as ${updated.account?.email || 'user'}.`, 'success');
-      await loadRemoteBackups();
-    } catch (err: any) {
-      addToast(err.message || 'Failed to authenticate with Google Drive.', 'error');
-      throw err;
-    } finally {
-      setIsGDriveLoading(false);
-    }
-  };
-
-  const disconnectGDrive = async () => {
-    setIsGDriveLoading(true);
-    try {
-      const updated = await window.vaultApi.gdrive.disconnect();
-      setGdriveStatus(updated);
-      setRemoteBackups([]);
-      addToast('Google Drive disconnected. Local vault remains intact.', 'info');
-    } catch (err: any) {
-      addToast(err.message || 'Failed to disconnect Google Drive.', 'error');
-    } finally {
-      setIsGDriveLoading(false);
-    }
-  };
-
-  const backupNowGDrive = async () => {
-    setIsGDriveLoading(true);
-    try {
-      await window.vaultApi.gdrive.backupNow();
-      await refreshGDriveStatus();
-      await loadRemoteBackups();
-      addToast('Encrypted backup successfully uploaded to Google Drive.', 'success');
-    } catch (err: any) {
-      addToast(err.message || 'Backup failed.', 'error');
-      throw err;
-    } finally {
-      setIsGDriveLoading(false);
-    }
-  };
-
-  const inspectRemoteBackup = async (fileId: string): Promise<EncryptedBackupContainer> => {
-    try {
-      return await window.vaultApi.gdrive.inspectBackup(fileId);
-    } catch (err: any) {
-      addToast(err.message || 'Failed to inspect remote backup.', 'error');
-      throw err;
-    }
-  };
-
-  const restoreRemoteBackup = async (fileId: string, masterPassword: string): Promise<RestoreComparison> => {
-    setIsLoading(true);
-    try {
-      const comparison = await window.vaultApi.gdrive.restoreBackup(fileId, masterPassword);
-      await loadEntries();
-      await refreshStatus();
-      addToast(`Restore complete: ${comparison.remoteItemCount} items restored from backup.`, 'success');
-      return comparison;
-    } catch (err: any) {
-      addToast(err.message || 'Restore failed.', 'error');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // --- Encrypted Container Backup & Restore Actions ---
   const createEncryptedBackup = async (): Promise<EncryptedBackupContainer> => {
     try {
       return await window.vaultApi.createBackupContainer();
@@ -587,16 +466,6 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const updateGDriveConfig = async (config: { isAutoBackupEnabled?: boolean; intervalMinutes?: number; retentionCount?: number; clientId?: string }) => {
-    try {
-      const updated = await window.vaultApi.gdrive.updateConfig(config);
-      setGdriveStatus(updated);
-      addToast('Backup preferences saved.', 'success');
-    } catch (err: any) {
-      addToast(err.message || 'Failed to update backup settings.', 'error');
-    }
-  };
-
   const openRestoreModal = (target: RestoreTarget) => {
     setRestoreTarget(target);
   };
@@ -604,16 +473,6 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const closeRestoreModal = () => {
     setRestoreTarget(null);
   };
-
-  // Poll Google Drive status when unlocked
-  useEffect(() => {
-    if (!status.isUnlocked) return;
-    refreshGDriveStatus();
-    const interval = setInterval(() => {
-      refreshGDriveStatus();
-    }, 20000);
-    return () => clearInterval(interval);
-  }, [status.isUnlocked, refreshGDriveStatus]);
 
   // Updates listener
   useEffect(() => {
@@ -707,9 +566,6 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         settings,
         isLoading,
         toasts,
-        gdriveStatus,
-        remoteBackups,
-        isGDriveLoading,
         isEntryModalOpen,
         editingEntry,
         defaultNewType,
@@ -735,16 +591,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         generatePassword,
         copyToClipboard,
         updateSettings,
-        refreshGDriveStatus,
-        connectGDrive,
-        disconnectGDrive,
-        backupNowGDrive,
-        loadRemoteBackups,
-        inspectRemoteBackup,
-        restoreRemoteBackup,
         createEncryptedBackup,
         restoreEncryptedBackup,
-        updateGDriveConfig,
         openCreateModal,
         openEditModal,
         closeEntryModal,

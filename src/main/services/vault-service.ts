@@ -33,6 +33,7 @@ import {
   ExportData,
   EncryptedRecord,
   EncryptedBackupContainer,
+  RestoreComparison,
 } from '../../shared/types';
 import {
   validatePayload,
@@ -40,7 +41,8 @@ import {
   validateExportData,
   ValidationError,
 } from '../../shared/validation';
-import { createBackupContainer, DecryptedBackupData } from '../backup/container';
+import { createBackupContainer, decryptAndValidateBackup, DecryptedBackupData } from '../backup/container';
+import { parseCsvToExportData } from '../../shared/csv-importer';
 
 const AUTH_CHECK_SENTINEL = 'voltrex-vault-auth-token-v1';
 
@@ -108,10 +110,6 @@ export class VaultService {
     const validated = validateSettings({
       autoLockMinutes: settings.autoLockMinutes ?? current.autoLockMinutes,
       clipboardClearSeconds: settings.clipboardClearSeconds ?? current.clipboardClearSeconds,
-      gdriveClientId: settings.gdriveClientId !== undefined ? settings.gdriveClientId : current.gdriveClientId,
-      gdriveAutoBackupEnabled: settings.gdriveAutoBackupEnabled !== undefined ? settings.gdriveAutoBackupEnabled : current.gdriveAutoBackupEnabled,
-      gdriveIntervalMinutes: settings.gdriveIntervalMinutes ?? current.gdriveIntervalMinutes,
-      gdriveRetentionCount: settings.gdriveRetentionCount ?? current.gdriveRetentionCount,
     });
     this.repo.saveSettings(validated);
     return validated;
@@ -459,9 +457,22 @@ export class VaultService {
   /**
    * Imports validated entries into the vault.
    */
-  public importVault(rawJsonData: unknown): { importedCount: number } {
+  public importVault(rawInput: unknown): { importedCount: number } {
     this.ensureUnlocked();
-    const validatedData = validateExportData(rawJsonData);
+    let validatedData: ExportData;
+
+    if (typeof rawInput === 'string') {
+      validatedData = parseCsvToExportData(rawInput);
+    } else if (
+      rawInput &&
+      typeof rawInput === 'object' &&
+      (rawInput as any).format === 'csv' &&
+      typeof (rawInput as any).csvContent === 'string'
+    ) {
+      validatedData = parseCsvToExportData((rawInput as any).csvContent);
+    } else {
+      validatedData = validateExportData(rawInput);
+    }
 
     const recordsToInsert: EncryptedRecord[] = [];
     const now = Date.now();
@@ -548,6 +559,35 @@ export class VaultService {
       }
       throw err;
     }
+  }
+
+  /**
+   * Restores an encrypted container directly with conflict comparison and atomic snapshot rollback.
+   */
+  public async restoreContainer(
+    container: EncryptedBackupContainer,
+    masterPassword: string
+  ): Promise<RestoreComparison> {
+    const localStatus = this.getStatus();
+    const localMeta = this.repo.getMetadata();
+
+    // 1. Decrypt and authenticate the container
+    const decrypted = await decryptAndValidateBackup(container, masterPassword);
+    const isSameVault = decrypted.vaultId === localMeta?.vaultId;
+
+    // 2. Perform atomic restore
+    this.restoreFromDecryptedBackup(decrypted);
+
+    return {
+      localVaultId: localMeta?.vaultId || '',
+      localItemCount: localStatus.itemCount,
+      localLastModified: Date.now(),
+      remoteVaultId: decrypted.vaultId,
+      remoteBackupId: decrypted.backupId,
+      remoteItemCount: decrypted.entries.length,
+      remoteCreatedAt: decrypted.createdAt,
+      isSameVault,
+    };
   }
 
   public close(): void {

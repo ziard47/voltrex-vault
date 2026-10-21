@@ -13,8 +13,6 @@ import {
   PasswordGeneratorOptions,
   ExportData,
   EncryptedBackupContainer,
-  GoogleDriveStatus,
-  RemoteBackupFile,
   RestoreComparison,
   GeneratedPasswordResult,
   UpdateCheckResult,
@@ -79,20 +77,7 @@ export const vaultApi = {
   maximize: (): Promise<boolean> => invokeIpc('app:maximize'),
   close: (): Promise<boolean> => invokeIpc('app:close'),
 
-  // Google Drive & Encrypted Backups
-  gdrive: {
-    getStatus: (): Promise<GoogleDriveStatus> => invokeIpc('gdrive:get-status'),
-    connect: (): Promise<GoogleDriveStatus> => invokeIpc('gdrive:connect'),
-    disconnect: (): Promise<GoogleDriveStatus> => invokeIpc('gdrive:disconnect'),
-    backupNow: (): Promise<void> => invokeIpc('gdrive:backup-now'),
-    listBackups: (): Promise<RemoteBackupFile[]> => invokeIpc('gdrive:list-backups'),
-    inspectBackup: (fileId: string): Promise<EncryptedBackupContainer> =>
-      invokeIpc('gdrive:inspect-backup', { fileId }),
-    restoreBackup: (fileId: string, masterPassword: string): Promise<RestoreComparison> =>
-      invokeIpc('gdrive:restore-backup', { fileId, masterPassword }),
-    updateConfig: (config: { isAutoBackupEnabled?: boolean; intervalMinutes?: number; retentionCount?: number; clientId?: string }): Promise<GoogleDriveStatus> =>
-      invokeIpc('gdrive:update-config', { config }),
-  },
+  // Encrypted Backup Containers (.voltrex)
   createBackupContainer: (): Promise<EncryptedBackupContainer> =>
     invokeIpc('backup:create-container'),
   restoreBackupContainer: (container: EncryptedBackupContainer, masterPassword: string): Promise<RestoreComparison> =>

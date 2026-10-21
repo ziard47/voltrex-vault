@@ -110,18 +110,10 @@ export class VaultRepository {
   public getSettings(): VaultSettings {
     const autoLockRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "autoLockMinutes";');
     const clipRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "clipboardClearSeconds";');
-    const clientIdRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "gdriveClientId";');
-    const autoBackupRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "gdriveAutoBackupEnabled";');
-    const intervalRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "gdriveIntervalMinutes";');
-    const retentionRow = this.db.queryOne<{ value: string }>('SELECT value FROM vault_settings WHERE key = "gdriveRetentionCount";');
 
     return {
       autoLockMinutes: autoLockRow ? Number(autoLockRow.value) : 15,
       clipboardClearSeconds: clipRow ? Number(clipRow.value) : 30,
-      gdriveClientId: clientIdRow?.value,
-      gdriveAutoBackupEnabled: autoBackupRow ? autoBackupRow.value === 'true' : false,
-      gdriveIntervalMinutes: intervalRow ? Number(intervalRow.value) : 60,
-      gdriveRetentionCount: retentionRow ? Number(retentionRow.value) : 5,
     };
   }
 
@@ -135,30 +127,6 @@ export class VaultRepository {
         'INSERT OR REPLACE INTO vault_settings (key, value) VALUES ("clipboardClearSeconds", ?);',
         [String(settings.clipboardClearSeconds)]
       );
-      if (settings.gdriveClientId !== undefined) {
-        this.db.run(
-          'INSERT OR REPLACE INTO vault_settings (key, value) VALUES ("gdriveClientId", ?);',
-          [settings.gdriveClientId]
-        );
-      }
-      if (settings.gdriveAutoBackupEnabled !== undefined) {
-        this.db.run(
-          'INSERT OR REPLACE INTO vault_settings (key, value) VALUES ("gdriveAutoBackupEnabled", ?);',
-          [String(settings.gdriveAutoBackupEnabled)]
-        );
-      }
-      if (settings.gdriveIntervalMinutes !== undefined) {
-        this.db.run(
-          'INSERT OR REPLACE INTO vault_settings (key, value) VALUES ("gdriveIntervalMinutes", ?);',
-          [String(settings.gdriveIntervalMinutes)]
-        );
-      }
-      if (settings.gdriveRetentionCount !== undefined) {
-        this.db.run(
-          'INSERT OR REPLACE INTO vault_settings (key, value) VALUES ("gdriveRetentionCount", ?);',
-          [String(settings.gdriveRetentionCount)]
-        );
-      }
     });
   }
 

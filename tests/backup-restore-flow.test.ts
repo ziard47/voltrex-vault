@@ -3,28 +3,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { VaultService } from '../src/main/services/vault-service';
-import { BackupScheduler } from '../src/main/services/backup-scheduler';
-import { GoogleDriveService } from '../src/main/services/gdrive-service';
 
 describe('Vault Backup & Restore Atomic Lifecycle', () => {
   let tmpDir: string;
   let dbPath: string;
   let vaultService: VaultService;
-  let gdriveService: GoogleDriveService;
-  let backupScheduler: BackupScheduler;
 
   beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'voltrex-restore-flow-test-'));
     dbPath = path.join(tmpDir, 'active-vault.db');
     vaultService = new VaultService(dbPath);
     await vaultService.initialize();
-
-    gdriveService = new GoogleDriveService(tmpDir);
-    backupScheduler = new BackupScheduler(vaultService, gdriveService);
   });
 
   afterEach(() => {
-    backupScheduler.close();
     vaultService.close();
     fs.rmSync(tmpDir, { recursive: true, force: true });
   });
@@ -65,7 +57,7 @@ describe('Vault Backup & Restore Atomic Lifecycle', () => {
     expect(vaultService.listEntries()).toHaveLength(2);
 
     // Restore from the earlier backup container
-    const comparison = await backupScheduler.restoreContainer(backupContainer, masterPassword);
+    const comparison = await vaultService.restoreContainer(backupContainer, masterPassword);
 
     expect(comparison.localItemCount).toBe(2);
     expect(comparison.remoteItemCount).toBe(1);
@@ -111,10 +103,8 @@ describe('Vault Backup & Restore Atomic Lifecycle', () => {
     const passwordB = 'VaultPasswordB2!';
     await secondVault.setupVault(passwordB);
 
-    const secondScheduler = new BackupScheduler(secondVault, gdriveService);
-
     // Restore containerA into secondVault
-    const comparison = await secondScheduler.restoreContainer(containerA, passwordA);
+    const comparison = await secondVault.restoreContainer(containerA, passwordA);
 
     expect(comparison.isSameVault).toBe(false);
     expect(comparison.remoteItemCount).toBe(1);
@@ -123,7 +113,6 @@ describe('Vault Backup & Restore Atomic Lifecycle', () => {
     expect(restoredEntries).toHaveLength(1);
     expect(restoredEntries[0].title).toBe('Vault A Item');
 
-    secondScheduler.close();
     secondVault.close();
   });
 });

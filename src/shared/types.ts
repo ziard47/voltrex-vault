@@ -90,10 +90,6 @@ export interface VaultMetadata {
 export interface VaultSettings {
   autoLockMinutes: number; // 0 = disabled, e.g. 1, 5, 15, 30
   clipboardClearSeconds: number; // e.g. 15, 30, 60, 120
-  gdriveClientId?: string;
-  gdriveAutoBackupEnabled?: boolean;
-  gdriveIntervalMinutes?: number;
-  gdriveRetentionCount?: number;
 }
 
 export interface VaultStatus {
@@ -168,32 +164,7 @@ export interface EncryptedBackupContainer {
   };
 }
 
-export interface GoogleDriveAccount {
-  email: string;
-  name: string;
-  picture?: string;
-}
 
-export interface GoogleDriveStatus {
-  isConnected: boolean;
-  account: GoogleDriveAccount | null;
-  clientId: string;
-  isAutoBackupEnabled: boolean;
-  intervalMinutes: number;
-  retentionCount: number;
-  lastBackupAt: number | null;
-  lastBackupStatus: 'idle' | 'in_progress' | 'success' | 'error';
-  lastError: string | null;
-}
-
-export interface RemoteBackupFile {
-  fileId: string;
-  name: string;
-  sizeBytes: number;
-  createdAt: number;
-  vaultId?: string;
-  backupId?: string;
-}
 
 export interface RestoreComparison {
   localVaultId: string;

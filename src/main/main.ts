@@ -3,21 +3,17 @@
  * Applies full security hardening, window lifecycle management, and IPC registration.
  */
 
-import { app, BrowserWindow, session, powerMonitor, shell } from 'electron';
+import { app, BrowserWindow, session, powerMonitor, shell, nativeImage } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import { VaultService } from './services/vault-service';
 import { ClipboardManager } from './clipboard/manager';
-import { GoogleDriveService } from './services/gdrive-service';
-import { BackupScheduler } from './services/backup-scheduler';
 import { registerIpcHandlers } from './ipc/handlers';
 import { UpdateService } from './services/update-service';
 
 let mainWindow: BrowserWindow | null = null;
 let vaultService: VaultService | null = null;
 let clipboardManager: ClipboardManager | null = null;
-let gdriveService: GoogleDriveService | null = null;
-let backupScheduler: BackupScheduler | null = null;
 let updateService: UpdateService | null = null;
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
@@ -34,9 +30,11 @@ async function createWindow(): Promise<void> {
   await vaultService.initialize();
 
   clipboardManager = new ClipboardManager();
-  gdriveService = new GoogleDriveService(userDataPath);
-  backupScheduler = new BackupScheduler(vaultService, gdriveService);
   updateService = new UpdateService('ziard47', 'voltrex-vault');
+
+  // Application icon resolution (logo.jpg)
+  const iconPath = path.join(app.getAppPath(), 'public', 'logo.jpg');
+  const appIcon = fs.existsSync(iconPath) ? nativeImage.createFromPath(iconPath) : undefined;
 
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -44,6 +42,7 @@ async function createWindow(): Promise<void> {
     minWidth: 960,
     minHeight: 640,
     frame: false, // Custom styled title bar adhering to desktop palette
+    icon: appIcon,
     backgroundColor: '#000000',
     show: false,
     webPreferences: {
@@ -57,7 +56,11 @@ async function createWindow(): Promise<void> {
     },
   });
 
-  registerIpcHandlers(vaultService, clipboardManager, gdriveService, backupScheduler, updateService, () => mainWindow);
+  if (appIcon && mainWindow) {
+    mainWindow.setIcon(appIcon);
+  }
+
+  registerIpcHandlers(vaultService, clipboardManager, updateService, () => mainWindow);
 
   // Security: Deny all permissions unconditionally
   session.defaultSession.setPermissionRequestHandler((_webContents, _permission, callback) => {
@@ -164,10 +167,6 @@ if (!gotTheLock) {
   });
 
   app.on('before-quit', () => {
-    if (backupScheduler) {
-      backupScheduler.close();
-      backupScheduler = null;
-    }
     if (vaultService) {
       vaultService.close();
       vaultService = null;
@@ -176,6 +175,5 @@ if (!gotTheLock) {
       clipboardManager.clearNow();
       clipboardManager = null;
     }
-    gdriveService = null;
   });
 }

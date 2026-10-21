@@ -18,7 +18,7 @@ export const TitleBar: React.FC = () => {
   const handleClose = () => window.vaultApi.close();
 
   return (
-    <header className="h-10 bg-vault-black border-b border-vault-border flex items-center justify-between px-3 select-none app-draggable z-50">
+    <header className="h-10 bg-vault-black border-b border-vault-border flex items-center justify-between px-3 select-none app-draggable relative z-[100]">
       {/* Brand Header */}
       <div className="flex items-center space-x-2.5 app-non-draggable">
         <div className="w-6 h-6 rounded-md overflow-hidden border border-vault-border flex-shrink-0">
