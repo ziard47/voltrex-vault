@@ -30,10 +30,12 @@ export function compareVersions(v1: string, v2: string): number {
 export class UpdateService {
   private repoOwner: string;
   private repoName: string;
+  private platform: NodeJS.Platform;
 
-  constructor(repoOwner = 'ziard47', repoName = 'voltrex-vault') {
+  constructor(repoOwner = 'ziard47', repoName = 'voltrex-vault', platform: NodeJS.Platform = process.platform) {
     this.repoOwner = repoOwner;
     this.repoName = repoName;
+    this.platform = platform;
   }
 
   public getCurrentVersion(): string {
@@ -116,10 +118,10 @@ export class UpdateService {
   /**
    * Selects the most appropriate installer or archive for the user's OS platform.
    */
-  private selectRecommendedAsset(assets: ReleaseAsset[]): ReleaseAsset | undefined {
+  public selectRecommendedAsset(assets: ReleaseAsset[], platformOverride?: NodeJS.Platform): ReleaseAsset | undefined {
     if (!assets || assets.length === 0) return undefined;
 
-    const platform = process.platform;
+    const platform = platformOverride || this.platform;
     if (platform === 'win32') {
       return (
         assets.find(a => a.name.endsWith('.exe')) ||

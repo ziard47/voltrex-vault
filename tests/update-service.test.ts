@@ -39,7 +39,34 @@ describe('UpdateService - GitHub Releases API', () => {
 
   beforeEach(() => {
     vi.restoreAllMocks();
-    updateService = new UpdateService('ziard47', 'voltrex-vault');
+    updateService = new UpdateService('ziard47', 'voltrex-vault', 'win32');
+  });
+
+  it('selects appropriate installer per platform', () => {
+    const assets = [
+      {
+        name: 'voltrex-vault-setup-1.1.0.exe',
+        size: 50000000,
+        browser_download_url: 'https://example.com/win.exe',
+        content_type: 'application/octet-stream',
+      },
+      {
+        name: 'voltrex-vault-1.1.0.dmg',
+        size: 55000000,
+        browser_download_url: 'https://example.com/mac.dmg',
+        content_type: 'application/octet-stream',
+      },
+      {
+        name: 'voltrex-vault-1.1.0.AppImage',
+        size: 60000000,
+        browser_download_url: 'https://example.com/linux.AppImage',
+        content_type: 'application/octet-stream',
+      },
+    ];
+
+    expect(updateService.selectRecommendedAsset(assets, 'win32')?.name).toBe('voltrex-vault-setup-1.1.0.exe');
+    expect(updateService.selectRecommendedAsset(assets, 'darwin')?.name).toBe('voltrex-vault-1.1.0.dmg');
+    expect(updateService.selectRecommendedAsset(assets, 'linux')?.name).toBe('voltrex-vault-1.1.0.AppImage');
   });
 
   it('handles 404 gracefully when no releases are published yet', async () => {
