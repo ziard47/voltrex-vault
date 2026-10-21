@@ -33,6 +33,7 @@
   "author": "Voltrex Digital | Mohomed Ziard",
   "license": "MIT",
   "dependencies": {
+    "hash-wasm": "^4.12.0",
     "sql.js": "^1.12.0"
   },
   "devDependencies": {
@@ -48,7 +49,6 @@
     "autoprefixer": "^10.4.20",
     "electron": "^34.2.0",
     "electron-builder": "^26.15.3",
-    "hash-wasm": "^4.12.0",
     "lucide-react": "^1.16.0",
     "postcss": "^8.5.2",
     "react": "^18.3.1",

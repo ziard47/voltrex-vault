@@ -160,10 +160,12 @@ async function packageWindows(version) {
           'dist/electron/**/*',
           'dist/renderer/**/*',
           'node_modules/sql.js/**/*',
+          'node_modules/hash-wasm/**/*',
           'package.json',
         ],
         asarUnpack: [
           'node_modules/sql.js/**/*',
+          'node_modules/hash-wasm/**/*',
         ],
         win: {
           forceCodeSigning: false,
@@ -226,10 +228,12 @@ async function packageLinux(version) {
       'dist/electron/**/*',
       'dist/renderer/**/*',
       'node_modules/sql.js/**/*',
+      'node_modules/hash-wasm/**/*',
       'package.json',
     ],
     asarUnpack: [
       'node_modules/sql.js/**/*',
+      'node_modules/hash-wasm/**/*',
     ],
     linux: {
       category: 'Utility',
