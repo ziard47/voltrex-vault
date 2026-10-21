@@ -11,6 +11,7 @@ import {
   Plus,
   Dna,
   Settings as SettingsIcon,
+  Sparkles,
 } from 'lucide-react';
 import logoUrl from '../../assets/logo.jpg';
 
@@ -23,6 +24,8 @@ export const Sidebar: React.FC = () => {
     openGenerator,
     openSettings,
     selectEntry,
+    updateInfo,
+    checkForUpdates,
   } = useVault();
 
   const activeEntries = entries.filter(e => !e.trashedAt);
@@ -122,6 +125,23 @@ export const Sidebar: React.FC = () => {
         >
           <Dna className="w-4 h-4 text-vault-olive" />
           <span>Password Generator</span>
+        </button>
+        <button
+          onClick={() => {
+            openSettings();
+            if (!updateInfo) {
+              checkForUpdates().catch(() => {});
+            }
+          }}
+          className="w-full flex items-center justify-between px-2.5 py-1.5 rounded text-xs text-vault-textSecondary hover:bg-vault-surface hover:text-vault-textPrimary transition-colors"
+        >
+          <div className="flex items-center space-x-2">
+            <Sparkles className="w-4 h-4 text-vault-olive" />
+            <span>Check Updates</span>
+          </div>
+          {updateInfo?.isUpdateAvailable && (
+            <span className="w-2 h-2 rounded-full bg-vault-lime animate-pulse" title="Update Available" />
+          )}
         </button>
         <button
           onClick={openSettings}

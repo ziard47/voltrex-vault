@@ -205,3 +205,32 @@ export interface RestoreComparison {
   remoteCreatedAt: number;
   isSameVault: boolean;
 }
+
+export interface ReleaseAsset {
+  name: string;
+  sizeBytes: number;
+  downloadUrl: string;
+  contentType: string;
+}
+
+export interface UpdateCheckResult {
+  currentVersion: string;
+  latestVersion: string;
+  isUpdateAvailable: boolean;
+  hasReleases: boolean;
+  releaseName: string;
+  releaseNotes: string;
+  publishedAt: string;
+  releaseUrl: string;
+  assets: ReleaseAsset[];
+  recommendedAsset?: ReleaseAsset;
+}
+
+export interface DownloadProgress {
+  status: 'idle' | 'downloading' | 'completed' | 'error';
+  percent: number;
+  transferredBytes: number;
+  totalBytes: number;
+  savedFilePath?: string;
+  error?: string;
+}

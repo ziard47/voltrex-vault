@@ -8,6 +8,7 @@ import { VaultService } from '../services/vault-service';
 import { ClipboardManager } from '../clipboard/manager';
 import { GoogleDriveService } from '../services/gdrive-service';
 import { BackupScheduler } from '../services/backup-scheduler';
+import { UpdateService } from '../services/update-service';
 import { generateSecurePassword } from '../crypto/generator';
 import {
   VaultEntryPayload,
@@ -30,6 +31,7 @@ export function registerIpcHandlers(
   clipboardManager: ClipboardManager,
   gdriveService: GoogleDriveService,
   backupScheduler: BackupScheduler,
+  updateService: UpdateService,
   getMainWindow: () => BrowserWindow | null
 ): void {
   function verifySender(event: IpcMainInvokeEvent): void {
@@ -239,5 +241,39 @@ export function registerIpcHandlers(
     const win = getMainWindow();
     if (win) win.close();
     return true;
+  });
+
+  // --- GitHub Releases Updates ---
+  handle('update:check', async () => {
+    return await updateService.checkForUpdates();
+  });
+
+  handle('update:open-release-page', async (_event, { url }: { url?: unknown } = {}) => {
+    const target = typeof url === 'string' && url.startsWith('https://') ? url : undefined;
+    return await updateService.openReleaseUrl(target);
+  });
+
+  handle('update:download', async (_event, { downloadUrl, assetName }: { downloadUrl: unknown; assetName: unknown }) => {
+    const url = validateString(downloadUrl, 'downloadUrl', 1, 2000);
+    const name = validateString(assetName, 'assetName', 1, 300);
+    const mainWindow = getMainWindow();
+
+    const savedFilePath = await updateService.downloadAsset(url, name, (progress) => {
+      if (mainWindow && !mainWindow.isDestroyed() && mainWindow.webContents) {
+        mainWindow.webContents.send('update:download-progress', progress);
+      }
+    });
+
+    return { savedFilePath };
+  });
+
+  handle('update:open-file', async (_event, { filePath }: { filePath: unknown }) => {
+    const pathStr = validateString(filePath, 'filePath', 1, 2000);
+    return await updateService.openDownloadedFile(pathStr);
+  });
+
+  handle('update:show-in-folder', (_event, { filePath }: { filePath: unknown }) => {
+    const pathStr = validateString(filePath, 'filePath', 1, 2000);
+    return updateService.showItemInFolder(pathStr);
   });
 }

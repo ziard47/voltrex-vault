@@ -14,6 +14,10 @@ import {
   FileArchive,
   RotateCcw,
   User,
+  Sparkles,
+  ExternalLink,
+  Play,
+  FolderOpen,
 } from 'lucide-react';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
@@ -42,6 +46,14 @@ export const SettingsModal: React.FC = () => {
     createEncryptedBackup,
     openRestoreModal,
     updateGDriveConfig,
+    updateInfo,
+    isCheckingUpdates,
+    downloadProgress,
+    checkForUpdates,
+    downloadUpdate,
+    openReleasePage,
+    openDownloadedFile,
+    showDownloadedInFolder,
   } = useVault();
 
   // Change password state
@@ -667,6 +679,196 @@ export const SettingsModal: React.FC = () => {
                   Imports valid 'voltrex-vault-unencrypted-export' datasets
                 </span>
               </div>
+            </div>
+          </section>
+
+          {/* Software Updates (GitHub Releases) */}
+          <section className="space-y-3 pt-3 border-t border-vault-border">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-bold uppercase tracking-wider text-vault-lime flex items-center space-x-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>Software Updates</span>
+              </h4>
+              <span className="text-[10px] text-vault-textMuted font-mono">
+                Source: github.com/ziard47/voltrex-vault
+              </span>
+            </div>
+
+            <div className="border border-vault-border rounded p-4 bg-black space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-semibold text-vault-textPrimary">
+                    Current Version: <span className="font-mono text-vault-lime">v1.0.0</span>
+                  </p>
+                  <p className="text-[10px] text-vault-textMuted mt-0.5">
+                    Official desktop builds are published directly on GitHub Releases.
+                  </p>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => checkForUpdates()}
+                    disabled={isCheckingUpdates}
+                    className="py-1.5 px-3 bg-vault-border hover:bg-vault-olive text-vault-textPrimary text-xs rounded font-medium transition-colors flex items-center space-x-1.5 disabled:opacity-50"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${isCheckingUpdates ? 'animate-spin text-vault-lime' : ''}`} />
+                    <span>{isCheckingUpdates ? 'Checking...' : 'Check for Updates'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openReleasePage()}
+                    className="py-1.5 px-3 bg-vault-surface hover:bg-vault-border text-vault-textSecondary hover:text-vault-textPrimary text-xs rounded transition-colors flex items-center space-x-1"
+                    title="View releases on GitHub"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" />
+                    <span>Releases</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Status / Result readout */}
+              {updateInfo && (
+                <div className="pt-2 border-t border-vault-border space-y-2.5">
+                  {updateInfo.isUpdateAvailable ? (
+                    <div className="p-3 bg-vault-lime/10 border border-vault-lime/40 rounded space-y-2.5">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <span className="w-2 h-2 rounded-full bg-vault-lime animate-pulse" />
+                          <span className="text-xs font-bold text-vault-lime uppercase tracking-wider">
+                            Update Available: v{updateInfo.latestVersion}
+                          </span>
+                        </div>
+                        {updateInfo.publishedAt && (
+                          <span className="text-[10px] text-vault-textMuted font-mono">
+                            {new Date(updateInfo.publishedAt).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs font-medium text-vault-textPrimary">
+                        {updateInfo.releaseName || `Release v${updateInfo.latestVersion}`}
+                      </p>
+
+                      {updateInfo.releaseNotes && (
+                        <div className="max-h-24 overflow-y-auto p-2 bg-black/70 rounded border border-vault-border text-[11px] text-vault-textSecondary font-mono whitespace-pre-wrap">
+                          {updateInfo.releaseNotes}
+                        </div>
+                      )}
+
+                      {/* Download Section */}
+                      {updateInfo.recommendedAsset ? (
+                        <div className="pt-1 flex items-center justify-between">
+                          <span className="text-[11px] text-vault-textMuted font-mono">
+                            {updateInfo.recommendedAsset.name}{' '}
+                            {updateInfo.recommendedAsset.sizeBytes > 0 &&
+                              `(${(updateInfo.recommendedAsset.sizeBytes / (1024 * 1024)).toFixed(1)} MB)`}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => downloadUpdate(updateInfo.recommendedAsset!)}
+                            disabled={downloadProgress?.status === 'downloading'}
+                            className="py-1.5 px-3.5 bg-vault-lime hover:bg-vault-limeHover text-black text-xs font-semibold rounded transition-colors flex items-center space-x-1.5"
+                          >
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Download Update</span>
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="pt-1 flex items-center justify-between">
+                          <span className="text-[11px] text-vault-textMuted">
+                            Binary release available on GitHub.
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => openReleasePage(updateInfo.releaseUrl)}
+                            className="py-1.5 px-3.5 bg-vault-lime hover:bg-vault-limeHover text-black text-xs font-semibold rounded transition-colors flex items-center space-x-1.5"
+                          >
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            <span>Open on GitHub</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : updateInfo.hasReleases ? (
+                    <div className="p-2.5 bg-vault-lime/10 border border-vault-lime/30 rounded flex items-center space-x-2 text-xs text-vault-lime">
+                      <CheckCircle className="w-4 h-4 flex-shrink-0" />
+                      <span>Voltrex Vault is up to date! You are running the latest version (v{updateInfo.currentVersion}).</span>
+                    </div>
+                  ) : (
+                    <div className="p-2.5 bg-[#0e100c] border border-vault-border rounded flex items-center justify-between text-xs text-vault-textSecondary">
+                      <span>No releases have been published on GitHub yet. You are running version {updateInfo.currentVersion}.</span>
+                      <button
+                        type="button"
+                        onClick={() => openReleasePage()}
+                        className="text-vault-lime hover:underline flex items-center space-x-1 text-[11px]"
+                      >
+                        <span>View Repository</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Realtime Download Progress Bar */}
+                  {downloadProgress && downloadProgress.status === 'downloading' && (
+                    <div className="p-3 bg-[#0a0b08] border border-vault-border rounded space-y-1.5">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-vault-lime font-medium flex items-center space-x-1">
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          <span>Downloading installer from GitHub...</span>
+                        </span>
+                        <span className="font-mono text-vault-textPrimary font-semibold">
+                          {downloadProgress.percent}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-vault-border rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-vault-lime transition-all duration-200"
+                          style={{ width: `${downloadProgress.percent}%` }}
+                        />
+                      </div>
+                      <div className="flex justify-between text-[10px] text-vault-textMuted font-mono">
+                        <span>
+                          {(downloadProgress.transferredBytes / (1024 * 1024)).toFixed(1)} MB /{' '}
+                          {downloadProgress.totalBytes > 0
+                            ? `${(downloadProgress.totalBytes / (1024 * 1024)).toFixed(1)} MB`
+                            : 'calculating...'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Download Completed Banner */}
+                  {downloadProgress && downloadProgress.status === 'completed' && downloadProgress.savedFilePath && (
+                    <div className="p-3 bg-vault-lime/15 border border-vault-lime/40 rounded space-y-2">
+                      <div className="flex items-center space-x-2 text-xs text-vault-lime font-semibold">
+                        <CheckCircle className="w-4 h-4 text-vault-lime" />
+                        <span>Update installer successfully downloaded!</span>
+                      </div>
+                      <p className="text-[10px] text-vault-textMuted font-mono truncate">
+                        Saved to: {downloadProgress.savedFilePath}
+                      </p>
+                      <div className="flex items-center space-x-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => openDownloadedFile(downloadProgress.savedFilePath!)}
+                          className="py-1 px-3 bg-vault-lime hover:bg-vault-limeHover text-black text-xs font-semibold rounded transition-colors flex items-center space-x-1"
+                        >
+                          <Play className="w-3 h-3" />
+                          <span>Run Installer</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => showDownloadedInFolder(downloadProgress.savedFilePath!)}
+                          className="py-1 px-3 bg-vault-border hover:bg-vault-olive text-vault-textPrimary text-xs rounded transition-colors flex items-center space-x-1"
+                        >
+                          <FolderOpen className="w-3 h-3" />
+                          <span>Show in Folder</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </section>
 

@@ -17,6 +17,8 @@ import {
   RemoteBackupFile,
   RestoreComparison,
   GeneratedPasswordResult,
+  UpdateCheckResult,
+  DownloadProgress,
 } from '../shared/types';
 
 async function invokeIpc<T>(channel: string, args?: unknown): Promise<T> {
@@ -95,6 +97,28 @@ export const vaultApi = {
     invokeIpc('backup:create-container'),
   restoreBackupContainer: (container: EncryptedBackupContainer, masterPassword: string): Promise<RestoreComparison> =>
     invokeIpc('backup:restore-container', { container, masterPassword }),
+
+  // GitHub Releases Updates
+  updates: {
+    check: (): Promise<UpdateCheckResult> => invokeIpc('update:check'),
+    openReleasePage: (url?: string): Promise<boolean> =>
+      invokeIpc('update:open-release-page', { url }),
+    download: (downloadUrl: string, assetName: string): Promise<{ savedFilePath: string }> =>
+      invokeIpc('update:download', { downloadUrl, assetName }),
+    openFile: (filePath: string): Promise<boolean> =>
+      invokeIpc('update:open-file', { filePath }),
+    showInFolder: (filePath: string): Promise<boolean> =>
+      invokeIpc('update:show-in-folder', { filePath }),
+    onProgress: (callback: (progress: DownloadProgress) => void): (() => void) => {
+      const listener = (_event: any, progress: DownloadProgress) => {
+        callback(progress);
+      };
+      ipcRenderer.on('update:download-progress', listener);
+      return () => {
+        ipcRenderer.removeListener('update:download-progress', listener);
+      };
+    },
+  },
 };
 
 contextBridge.exposeInMainWorld('vaultApi', vaultApi);

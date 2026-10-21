@@ -16,6 +16,9 @@ import {
   RestoreComparison,
   EncryptedBackupContainer,
   GeneratedPasswordResult,
+  UpdateCheckResult,
+  ReleaseAsset,
+  DownloadProgress,
 } from '../../shared/types';
 
 export type CategoryFilter = 'all' | EntryType | 'favorites' | 'trash';
@@ -100,6 +103,16 @@ interface VaultContextType {
   openRestoreModal: (target: RestoreTarget) => void;
   closeRestoreModal: () => void;
   dismissToast: (id: string) => void;
+
+  // Updates state & actions
+  updateInfo: UpdateCheckResult | null;
+  isCheckingUpdates: boolean;
+  downloadProgress: DownloadProgress | null;
+  checkForUpdates: () => Promise<UpdateCheckResult>;
+  downloadUpdate: (asset: ReleaseAsset) => Promise<string>;
+  openReleasePage: (url?: string) => Promise<void>;
+  openDownloadedFile: (filePath: string) => Promise<void>;
+  showDownloadedInFolder: (filePath: string) => Promise<void>;
 }
 
 const VaultContext = createContext<VaultContextType | undefined>(undefined);
@@ -136,6 +149,11 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [defaultNewType, setDefaultNewType] = useState<EntryType>('login');
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  // Updates state
+  const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null);
+  const [isCheckingUpdates, setIsCheckingUpdates] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState<DownloadProgress | null>(null);
 
   // Inactivity tracking
   const lastActivityRef = useRef<number>(Date.now());
@@ -593,6 +611,77 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     return () => clearInterval(interval);
   }, [status.isUnlocked, refreshGDriveStatus]);
 
+  // Updates listener
+  useEffect(() => {
+    if (!window.vaultApi?.updates?.onProgress) return;
+    const unsubscribe = window.vaultApi.updates.onProgress(p => {
+      setDownloadProgress(p);
+      if (p.status === 'completed') {
+        const name = p.savedFilePath ? p.savedFilePath.split(/[\/\\]/).pop() : 'Installer';
+        addToast(`Update downloaded successfully: ${name}`, 'success');
+      } else if (p.status === 'error') {
+        addToast(`Download failed: ${p.error || 'Unknown error'}`, 'error');
+      }
+    });
+    return () => unsubscribe();
+  }, [addToast]);
+
+  const checkForUpdates = useCallback(async (): Promise<UpdateCheckResult> => {
+    setIsCheckingUpdates(true);
+    try {
+      const res = await window.vaultApi.updates.check();
+      setUpdateInfo(res);
+      if (res.isUpdateAvailable) {
+        addToast(`New update available: v${res.latestVersion}!`, 'info');
+      } else if (res.hasReleases) {
+        addToast(`Voltrex Vault is up to date (v${res.currentVersion}).`, 'success');
+      } else {
+        addToast(`No published releases found yet on GitHub (v${res.currentVersion}).`, 'info');
+      }
+      return res;
+    } catch (err: any) {
+      addToast(err.message || 'Failed to check for updates.', 'error');
+      throw err;
+    } finally {
+      setIsCheckingUpdates(false);
+    }
+  }, [addToast]);
+
+  const downloadUpdate = useCallback(async (asset: ReleaseAsset): Promise<string> => {
+    try {
+      addToast(`Downloading ${asset.name}...`, 'info');
+      const res = await window.vaultApi.updates.download(asset.downloadUrl, asset.name);
+      return res.savedFilePath;
+    } catch (err: any) {
+      addToast(err.message || 'Download failed.', 'error');
+      throw err;
+    }
+  }, [addToast]);
+
+  const openReleasePage = useCallback(async (url?: string) => {
+    try {
+      await window.vaultApi.updates.openReleasePage(url);
+    } catch {
+      addToast('Failed to open release page.', 'error');
+    }
+  }, [addToast]);
+
+  const openDownloadedFile = useCallback(async (filePath: string) => {
+    try {
+      await window.vaultApi.updates.openFile(filePath);
+    } catch {
+      addToast('Failed to open downloaded file.', 'error');
+    }
+  }, [addToast]);
+
+  const showDownloadedInFolder = useCallback(async (filePath: string) => {
+    try {
+      await window.vaultApi.updates.showInFolder(filePath);
+    } catch {
+      addToast('Failed to reveal file in folder.', 'error');
+    }
+  }, [addToast]);
+
   return (
     <VaultContext.Provider
       value={{
@@ -652,6 +741,14 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         openRestoreModal,
         closeRestoreModal,
         dismissToast,
+        updateInfo,
+        isCheckingUpdates,
+        downloadProgress,
+        checkForUpdates,
+        downloadUpdate,
+        openReleasePage,
+        openDownloadedFile,
+        showDownloadedInFolder,
       }}
     >
       {children}

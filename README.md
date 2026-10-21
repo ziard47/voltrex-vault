@@ -1,10 +1,13 @@
 # Voltrex Vault
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![CI](https://github.com/voltrex/voltrex-vault/actions/workflows/ci.yml/badge.svg)](.github/workflows/ci.yml)
 [![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue.svg)](tsconfig.json)
 
-Voltrex Vault is a free, open-source, local-first password and secrets manager built with **Electron**, **React**, **TypeScript (Strict Mode)**, **Vite**, **MUI**, **Tailwind CSS**, and **SQLite**.
+<p align="center">
+  <img src="public/logo.jpg" alt="Voltrex Vault Logo" width="120" style="border-radius: 16px;" />
+</p>
+
+Voltrex Vault is a free, open-source, local-first password and secrets manager built with **Electron**, **React**, **TypeScript (Strict Mode)**, **Vite**, **MUI (Material UI)**, **Tailwind CSS**, and **SQLite**. It features authenticated AES-256-GCM encryption, Argon2id key derivation, zero-knowledge Google Drive backups, a companion Chromium autofill extension, direct GitHub release updates, and an automated multi-platform packaging system.
 
 > **Documentation**: [Threat Model](docs/THREAT_MODEL.md) | [Architecture](docs/ARCHITECTURE.md) | [Security Policy](SECURITY.md) | [Contributing](CONTRIBUTING.md) | [License](LICENSE)
 
@@ -154,72 +157,6 @@ The backup file format is completely portable and cross-device compatible. It re
 
 ---
 
-## 4. Threat Model & Security Guarantees
-
-| Attack Vector | Mitigation / Guarantee |
-| :--- | :--- |
-| **Database Stolen at Rest** | Plaintext credentials, notes, and keys are NEVER written to disk. All payloads are AES-256-GCM encrypted. SQLite database file is written with restrictive `0600` permissions. |
-| **Ciphertext Tampering** | AES-256-GCM authenticates ciphertext with a 128-bit authentication tag. Tampering with any byte causes immediate rejection (`CryptoIntegrityError`). |
-| **Google Cloud Interception** | Cloud storage receives only authenticated AES-256-GCM ciphertext. The master password and raw DEK are never transmitted over the network. |
-| **Google Account Compromise** | An attacker with access to the user's Google Drive cannot decrypt the backup containers without the master password (protected by 64 MiB Argon2id). |
-| **Renderer / XSS Exploits** | Strict CSP. Preload exposes only validated, typed methods. Navigation locks prevent external redirects. |
-| **IPC Spoofing** | Every IPC invocation verifies that `event.senderFrame` corresponds strictly to the trusted mainWindow mainFrame. |
-| **Memory Snooping** | In-memory key buffers (DEK, KEK, MasterKey) are zeroized with `buf.fill(0)` immediately upon vault locking or application exit. |
-
----
-
-## 5. Build, Test, and Launch Instructions
-
-### Prerequisites
-- Node.js `>= 18` (Tested on `v24.18.0`)
-- npm `>= 9` (Tested on `11.16.0`)
-
-### Installation
-```bash
-npm install
-```
-
-### Running Tests
-Execute the full test suite (40 tests across 9 test files covering cryptography, backup containers, atomic restore, Google Drive PKCE, storage, and secret leakage):
-```bash
-npm test
-```
-
-### Type Checking & Linting
-Validate strict TypeScript compilation across desktop renderer, Electron processes, and browser extension:
-```bash
-npm run typecheck
-```
-
-### Building the Application & Extension
-Build the Vite React desktop bundle, compile Electron main/preload/native-host, and bundle the Chrome extension:
-```bash
-npm run build
-```
-
-Or build individual targets:
-```bash
-npm run build:vite       # Desktop React renderer
-npm run build:electron   # Electron main, preload, and native host
-npm run build:extension  # Chromium extension (manifest, popup, background, content)
-```
-
-### Launching the Desktop Application
-Start the desktop application:
-```bash
-npm start
-```
-Or for development with Vite HMR:
-```bash
-# Terminal 1: Run Vite dev server
-npm run dev:vite
-
-# Terminal 2: Run Electron
-npm run dev:electron
-```
-
----
-
 ## 4. Phase 3: Chromium Browser Extension & Native Messaging
 
 Voltrex Vault includes a companion Chromium extension (Chrome, Brave, Edge, Vivaldi) delivering a seamless autofill experience inspired by 1Password, while strictly keeping the desktop application as the sole cryptographic authority.
@@ -321,3 +258,157 @@ This generates the standalone unpacked extension bundle in `dist/extension/`.
    npm run register:host -- --extension-id <YOUR_EXTENSION_ID>
    ```
 5. Launch the desktop app (`npm start`), unlock your vault, and click the Voltrex Vault extension icon in your browser toolbar to autofill, generate passwords, and capture logins.
+
+---
+
+## 5. Software Updates & GitHub Releases
+
+Voltrex Vault includes a zero-telemetry software update system fetching directly from official GitHub Releases (`ziard47/voltrex-vault`).
+
+### A. Architectural & Security Principles
+- **Strict CSP Enforcement**: The desktop renderer enforces `connect-src 'none';` to prevent accidental data exfiltration. All release queries and downloads execute exclusively in Electron's trusted Main Process via secure IPC channels (`window.vaultApi.updates.*`).
+- **Semantic Versioning**: Automatically checks release tags via semver comparison (`compareVersions`).
+- **Graceful Offline & 404 Handling**: If GitHub has no tagged releases yet or the system is offline, the app handles it cleanly without crashing or blocking user workflow.
+- **Direct Streaming Downloader**: Updates are streamed directly into the user's OS `Downloads` folder using Node 22 native `fetch` and piped streams, reporting chunk-by-chunk download percentages and byte progress.
+
+### B. In-App User Experience
+- **Sidebar Notification**: A pulsating notification dot appears on the sidebar when a newer release is detected.
+- **Settings > Software Updates**:
+  - Displays current version and latest available version.
+  - Manual **"Check for Updates"** button and direct link to GitHub Releases.
+  - Release notes preview and recommended installer asset detection (Windows `.exe`, Linux `.tar.gz`/`.AppImage`, macOS `.dmg`).
+  - Real-time download progress bar with percentage and transferred/total megabytes.
+  - Post-download action buttons: **"Run Installer"** and **"Show in Folder"**.
+
+---
+
+## 6. Packaging & Distribution System
+
+Voltrex Vault provides an automated, unified packaging system targeting Windows, Linux, and the browser extension.
+
+### A. Interactive Version Prompting
+When executing packaging scripts in an interactive terminal, the CLI prompts for a version number:
+```
+========================================
+   Voltrex Vault Packaging System
+========================================
+
+Enter version number to package (default: 1.0.0):
+```
+- Pressing <kbd>Enter</kbd> (or running in non-interactive/CI pipelines) defaults automatically to the `version` declared in `package.json`.
+- Entering a custom version (e.g., `1.1.0` or `v1.1.0`) packages with that specified version and updates the extension `manifest.json`.
+- Version flags can also be provided directly via CLI: `--version 1.2.0` or `-v 1.2.0`.
+
+### B. Distribution Directory Layout
+All packaged outputs are created inside a structured `releases/` folder:
+```
+releases/
+├── windows/
+│   └── <version>/
+│       ├── Voltrex-Vault-Setup-<version>.exe  (NSIS Setup Installer)
+│       └── Voltrex-Vault-Setup-<version>.exe.blockmap
+├── linux/
+│   └── <version>/
+│       ├── voltrex-vault-<version>-x64.tar.gz  (Linux tar.gz Setup Archive)
+│       └── voltrex-vault-<version>-x86_64.AppImage (AppImage)
+└── extension/
+    └── <version>/
+        ├── voltrex-vault-extension-<version>.zip  (Ready for Chrome Web Store)
+        └── voltrex-vault-extension-<version>/    (Unpacked distribution folder)
+```
+
+### C. Packaging Commands
+
+| Command | Target | Output Artifact |
+| :--- | :--- | :--- |
+| `npm run package:win` | Windows | NSIS Setup executable (`Voltrex-Vault-Setup-<version>.exe`) |
+| `npm run package:linux` | Linux | Setup archive (`voltrex-vault-<version>-x64.tar.gz`) + AppImage |
+| `npm run package:extension` | Chromium | Companion extension zip + unpacked folder |
+| `npm run package:all` | All | Windows installer, Linux packages, and browser extension |
+| `npm run package` | Interactive | Menu selector allowing user to choose target |
+
+> **Linux AppImage Note**: AppImages require Linux filesystem utilities (`mksquashfs`). When building on a Windows host without Docker, the `.tar.gz` archive is compiled natively and a helpful diagnostic notice is displayed. In Linux environments or CI/CD pipelines, both `.tar.gz` and `.AppImage` build automatically.
+
+---
+
+## 7. Threat Model & Security Guarantees
+
+| Attack Vector | Mitigation / Guarantee |
+| :--- | :--- |
+| **Database Stolen at Rest** | Plaintext credentials, notes, and keys are NEVER written to disk. All payloads are AES-256-GCM encrypted. SQLite database file is written with restrictive `0600` permissions. |
+| **Ciphertext Tampering** | AES-256-GCM authenticates ciphertext with a 128-bit authentication tag. Tampering with any byte causes immediate rejection (`CryptoIntegrityError`). |
+| **Google Cloud Interception** | Cloud storage receives only authenticated AES-256-GCM ciphertext. The master password and raw DEK are never transmitted over the network. |
+| **Google Account Compromise** | An attacker with access to the user's Google Drive cannot decrypt the backup containers without the master password (protected by 64 MiB Argon2id). |
+| **Renderer / XSS Exploits** | Strict CSP (`connect-src 'none'`). Preload exposes only validated, typed methods. Navigation locks prevent external redirects. |
+| **IPC Spoofing** | Every IPC invocation verifies that `event.senderFrame` corresponds strictly to the trusted mainWindow mainFrame. |
+| **Memory Snooping** | In-memory key buffers (DEK, KEK, MasterKey) are zeroized with `buf.fill(0)` immediately upon vault locking or application exit. |
+
+---
+
+## 8. Build, Test, and Launch Instructions
+
+### Prerequisites
+- Node.js `>= 18` (Tested on `v22.8.0` / `v24.x`)
+- npm `>= 9` (Tested on `10.8.2` / `11.x`)
+
+### Installation
+```bash
+npm install
+```
+
+### Running Tests
+Execute the full Vitest suite covering cryptography, backup containers, atomic restore, Google Drive PKCE, storage, and GitHub update checking:
+```bash
+npm test
+```
+
+### Type Checking
+Validate strict TypeScript compilation across desktop renderer, Electron processes, and companion extension:
+```bash
+npm run typecheck
+```
+
+### Building Application Artifacts
+Build all components (Vite desktop bundle, Electron processes, and companion extension):
+```bash
+npm run build
+```
+
+Or build individual targets:
+```bash
+npm run build:vite       # Desktop React renderer
+npm run build:electron   # Electron main, preload, and native host
+npm run build:extension  # Chromium extension (manifest, popup, background, content)
+```
+
+### Packaging for Release
+Package distributables into the `releases/` directory:
+```bash
+# Windows Setup Installer (NSIS)
+npm run package:win
+
+# Linux tar.gz and AppImage
+npm run package:linux
+
+# Chromium Browser Extension (.zip and unpacked)
+npm run package:extension
+
+# Package All Platforms
+npm run package:all
+```
+
+### Launching the Desktop Application
+Start the desktop application in production mode:
+```bash
+npm start
+```
+
+Or run in development mode with Vite HMR:
+```bash
+# Terminal 1: Vite dev server
+npm run dev:vite
+
+# Terminal 2: Electron application
+npm run dev:electron
+```
+
