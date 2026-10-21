@@ -58,6 +58,7 @@ interface VaultContextType {
   defaultNewType: EntryType;
   isGeneratorOpen: boolean;
   isSettingsOpen: boolean;
+  isCheckUpdatesOpen: boolean;
   restoreTarget: RestoreTarget | null;
 
   // Actions
@@ -100,6 +101,8 @@ interface VaultContextType {
   closeGenerator: () => void;
   openSettings: () => void;
   closeSettings: () => void;
+  openCheckUpdates: () => void;
+  closeCheckUpdates: () => void;
   openRestoreModal: (target: RestoreTarget) => void;
   closeRestoreModal: () => void;
   dismissToast: (id: string) => void;
@@ -149,6 +152,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [defaultNewType, setDefaultNewType] = useState<EntryType>('login');
   const [isGeneratorOpen, setIsGeneratorOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCheckUpdatesOpen, setIsCheckUpdatesOpen] = useState(false);
 
   // Updates state
   const [updateInfo, setUpdateInfo] = useState<UpdateCheckResult | null>(null);
@@ -682,6 +686,15 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   }, [addToast]);
 
+  const openCheckUpdates = useCallback(() => {
+    setIsCheckUpdatesOpen(true);
+    checkForUpdates().catch(() => {});
+  }, [checkForUpdates]);
+
+  const closeCheckUpdates = useCallback(() => {
+    setIsCheckUpdatesOpen(false);
+  }, []);
+
   return (
     <VaultContext.Provider
       value={{
@@ -702,6 +715,7 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         defaultNewType,
         isGeneratorOpen,
         isSettingsOpen,
+        isCheckUpdatesOpen,
         restoreTarget,
         refreshStatus,
         setupVault,
@@ -738,6 +752,8 @@ export const VaultProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         closeGenerator: () => setIsGeneratorOpen(false),
         openSettings: () => setIsSettingsOpen(true),
         closeSettings: () => setIsSettingsOpen(false),
+        openCheckUpdates,
+        closeCheckUpdates,
         openRestoreModal,
         closeRestoreModal,
         dismissToast,

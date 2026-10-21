@@ -15,5 +15,5 @@
       "@/*": ["src/*"]
     }
   },
-  "include": ["src/main/**/*", "src/preload/**/*", "src/shared/**/*", "src/native-host/**/*"]
+  "include": ["src/main/**/*", "src/preload/**/*", "src/shared/**/*"]
 }

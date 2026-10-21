@@ -7,7 +7,7 @@
   <img src="public/logo.jpg" alt="Voltrex Vault Logo" width="120" style="border-radius: 16px;" />
 </p>
 
-Voltrex Vault is a free, open-source, local-first password and secrets manager built with **Electron**, **React**, **TypeScript (Strict Mode)**, **Vite**, **MUI (Material UI)**, **Tailwind CSS**, and **SQLite**. It features authenticated AES-256-GCM encryption, Argon2id key derivation, zero-knowledge Google Drive backups, a companion Chromium autofill extension, direct GitHub release updates, and an automated multi-platform packaging system.
+Voltrex Vault is a free, open-source, local-first password and secrets manager built with **Electron**, **React**, **TypeScript (Strict Mode)**, **Vite**, **MUI (Material UI)**, **Tailwind CSS**, and **SQLite**. It features authenticated AES-256-GCM encryption, Argon2id key derivation, zero-knowledge Google Drive backups, direct GitHub release updates, and an automated multi-platform packaging system for Windows and Linux.
 
 > **Documentation**: [Threat Model](docs/THREAT_MODEL.md) | [Architecture](docs/ARCHITECTURE.md) | [Security Policy](SECURITY.md) | [Contributing](CONTRIBUTING.md) | [License](LICENSE)
 
@@ -157,111 +157,7 @@ The backup file format is completely portable and cross-device compatible. It re
 
 ---
 
-## 4. Phase 3: Chromium Browser Extension & Native Messaging
-
-Voltrex Vault includes a companion Chromium extension (Chrome, Brave, Edge, Vivaldi) delivering a seamless autofill experience inspired by 1Password, while strictly keeping the desktop application as the sole cryptographic authority.
-
-```
-┌────────────────────────────────────────────────────────┐
-│                   Chromium Browser                     │
-│                                                        │
-│   ┌────────────────────────┐  ┌────────────────────┐   │
-│   │   Content Script       │  │    Popup UI        │   │
-│   │   - Isolated Frame     │  │    React + Tailwind│   │
-│   │   - User-driven Fill   │  │    Voltrex Palette │   │
-│   │   - No Auto-Submit     │  │    Entropy Meter   │   │
-│   └───────────┬────────────┘  └─────────┬──────────┘   │
-│               │                         │              │
-│               ▼                         ▼              │
-│   ┌────────────────────────────────────────────────┐   │
-│   │        Background Service Worker (MV3)         │   │
-│   │        - Transient In-Memory Candidates        │   │
-│   │        - Active Tab Canonical Origin Match     │   │
-│   │        - Zero Secrets in Browser Storage       │   │
-│   └───────────────────────┬────────────────────────┘   │
-└───────────────────────────┼────────────────────────────┘
-                            │ Chrome Native Messaging (stdio)
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│     Native Messaging Host (com.voltrex.vault)          │
-│     - Node.js / TypeScript Stdio Host                  │
-│     - Strict Command Allowlist & 1MB Length Limit      │
-│     - Connects via Local Domain Socket / Named Pipe    │
-└───────────────────────────┬────────────────────────────┘
-                            │ Unix Domain Socket (`0600`) / Named Pipe
-                            ▼
-┌────────────────────────────────────────────────────────┐
-│             Desktop Application (Electron)             │
-│   ┌────────────────────────────────────────────────┐   │
-│   │           Extension Bridge Server              │   │
-│   │   - Restrictive Socket Permissions (`0600`)   │   │
-│   │   - Origin Enforcement on Credential Retrieval │   │
-│   │   - Insecure HTTP Autofill Blocking            │   │
-│   └───────────────────────┬────────────────────────┘   │
-│                           │                            │
-│                           ▼                            │
-│   ┌────────────────────────────────────────────────┐   │
-│   │        Voltrex VaultService (Master Auth)      │   │
-│   └────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
-```
-
-### A. Security Boundaries & Threat Model
-
-1. **Desktop App is the Sole Authority**:
-   - The browser extension never possesses the Argon2id KDF keys, the master password, the DEK, or the SQLite database.
-   - When the vault is locked or the desktop application is closed, the extension cannot retrieve passwords.
-2. **Zero Plaintext Stored in Browser**:
-   - The extension stores no plaintext passwords or credentials in `chrome.storage.local`, `chrome.storage.sync`, or IndexedDB.
-   - Captured candidate logins are stored in volatile service worker memory for that specific tab and are purged on tab close or page navigation.
-3. **Dedicated Native Messaging Host (`com.voltrex.vault`)**:
-   - No local unauthenticated HTTP server or exposed WebSocket.
-   - Communicates strictly over standard input/output (`stdio`) mediated by Chromium's native messaging infrastructure.
-   - Connects to the desktop app via an OS-level Unix domain socket with restrictive `0600` permissions (or Windows Named Pipe).
-4. **Command Allowlist & Payload Guards**:
-   - Native host strictly validates input length with a 1 MB ceiling (`MAX_NATIVE_MESSAGE_BYTES = 1,048,576`).
-   - Allowed commands only: `status`, `search-logins`, `get-login`, `generate-password`, `save-login`, `lock-vault`.
-   - All search queries omit secret passwords; only title, username, and ID are returned for display.
-5. **Canonical Origin Matching**:
-   - Origins are normalized according to RFC 3986 (scheme, host, port).
-   - Strict subdomain separation: `app.service.com` will never receive credentials saved for `billing.service.com` or `service.com`.
-   - Internationalized Domain Names (IDN) and Punycode spoofing defense via standard URL host normalization.
-   - Insecure plain `http:` origins are blocked by default from autofill.
-6. **No Auto-Submit & User-Driven Autofill**:
-   - Credentials are NEVER injected on page load. Autofill requires an explicit user click on "Fill" in the extension popup.
-   - The content script never submits forms (`form.submit()` or simulating Enter is forbidden).
-   - Frame isolation: Autofill is blocked inside untrusted third-party or cross-origin iframes.
-
-### B. Installing & Registering the Browser Extension
-
-#### 1. Register the Native Messaging Host
-Register the host manifest `com.voltrex.vault.json` for installed Chromium browsers (including both native packages and Flatpak installations on SteamOS / Linux):
-```bash
-npm run register:host
-```
-*Supported browsers: Google Chrome, Chromium, Brave, Microsoft Edge, Vivaldi.*
-
-> **SteamOS & Flatpak Note**: `register:host` automatically configures `flatpak-spawn --host` bridge manifests and permissions (`flatpak override --user --talk-name=org.freedesktop.Flatpak`) for sandboxed Flatpak browsers (e.g. Edge on Steam Deck). If you are using a Flatpak browser, completely close and reopen your browser once after running `register:host` for the new sandbox permissions to take effect.
-
-#### 2. Build the Extension
-```bash
-npm run build:extension
-```
-This generates the standalone unpacked extension bundle in `dist/extension/`.
-
-#### 3. Load the Extension in Your Browser
-1. Open your Chromium browser and navigate to `chrome://extensions` (or `brave://extensions`, `edge://extensions`).
-2. Enable **Developer mode** (toggle in top right).
-3. Click **Load unpacked** and select the `dist/extension` directory inside the `voltrex-vault` project.
-4. Copy the Extension ID (e.g., `abcdefghijklmnopqrstuvwxyz123456`) and register it with the native host:
-   ```bash
-   npm run register:host -- --extension-id <YOUR_EXTENSION_ID>
-   ```
-5. Launch the desktop app (`npm start`), unlock your vault, and click the Voltrex Vault extension icon in your browser toolbar to autofill, generate passwords, and capture logins.
-
----
-
-## 5. Software Updates & GitHub Releases
+## 4. Software Updates & GitHub Releases
 
 Voltrex Vault includes a zero-telemetry software update system fetching directly from official GitHub Releases (`ziard47/voltrex-vault`).
 
@@ -276,15 +172,15 @@ Voltrex Vault includes a zero-telemetry software update system fetching directly
 - **Settings > Software Updates**:
   - Displays current version and latest available version.
   - Manual **"Check for Updates"** button and direct link to GitHub Releases.
-  - Release notes preview and recommended installer asset detection (Windows `.exe`, Linux `.tar.gz`/`.AppImage`, macOS `.dmg`).
+  - Release notes preview and recommended installer asset detection (Windows `.exe`, Linux `.tar.gz`/`.AppImage`).
   - Real-time download progress bar with percentage and transferred/total megabytes.
   - Post-download action buttons: **"Run Installer"** and **"Show in Folder"**.
 
 ---
 
-## 6. Packaging & Distribution System
+## 5. Packaging & Distribution System
 
-Voltrex Vault provides an automated, unified packaging system targeting Windows, Linux, and the browser extension.
+Voltrex Vault provides an automated, unified packaging system targeting Windows and Linux desktop environments.
 
 ### A. Interactive Version Prompting
 When executing packaging scripts in an interactive terminal, the CLI prompts for a version number:
@@ -296,7 +192,7 @@ When executing packaging scripts in an interactive terminal, the CLI prompts for
 Enter version number to package (default: 1.0.0):
 ```
 - Pressing <kbd>Enter</kbd> (or running in non-interactive/CI pipelines) defaults automatically to the `version` declared in `package.json`.
-- Entering a custom version (e.g., `1.1.0` or `v1.1.0`) packages with that specified version and updates the extension `manifest.json`.
+- Entering a custom version (e.g., `1.1.0` or `v1.1.0`) packages with that specified version.
 - Version flags can also be provided directly via CLI: `--version 1.2.0` or `-v 1.2.0`.
 
 ### B. Distribution Directory Layout
@@ -307,14 +203,10 @@ releases/
 │   └── <version>/
 │       ├── Voltrex-Vault-Setup-<version>.exe  (NSIS Setup Installer)
 │       └── Voltrex-Vault-Setup-<version>.exe.blockmap
-├── linux/
-│   └── <version>/
-│       ├── voltrex-vault-<version>-x64.tar.gz  (Linux tar.gz Setup Archive)
-│       └── voltrex-vault-<version>-x86_64.AppImage (AppImage)
-└── extension/
+└── linux/
     └── <version>/
-        ├── voltrex-vault-extension-<version>.zip  (Ready for Chrome Web Store)
-        └── voltrex-vault-extension-<version>/    (Unpacked distribution folder)
+        ├── voltrex-vault-<version>-x64.tar.gz  (Linux tar.gz Setup Archive)
+        └── voltrex-vault-<version>-x86_64.AppImage (AppImage)
 ```
 
 ### C. Packaging Commands
@@ -323,15 +215,14 @@ releases/
 | :--- | :--- | :--- |
 | `npm run package:win` | Windows | NSIS Setup executable (`Voltrex-Vault-Setup-<version>.exe`) |
 | `npm run package:linux` | Linux | Setup archive (`voltrex-vault-<version>-x64.tar.gz`) + AppImage |
-| `npm run package:extension` | Chromium | Companion extension zip + unpacked folder |
-| `npm run package:all` | All | Windows installer, Linux packages, and browser extension |
+| `npm run package:all` | All | Windows installer and Linux packages |
 | `npm run package` | Interactive | Menu selector allowing user to choose target |
 
 > **Linux AppImage Note**: AppImages require Linux filesystem utilities (`mksquashfs`). When building on a Windows host without Docker, the `.tar.gz` archive is compiled natively and a helpful diagnostic notice is displayed. In Linux environments or CI/CD pipelines, both `.tar.gz` and `.AppImage` build automatically.
 
 ---
 
-## 7. Threat Model & Security Guarantees
+## 6. Threat Model & Security Guarantees
 
 | Attack Vector | Mitigation / Guarantee |
 | :--- | :--- |
@@ -345,7 +236,7 @@ releases/
 
 ---
 
-## 8. Build, Test, and Launch Instructions
+## 7. Build, Test, and Launch Instructions
 
 ### Prerequisites
 - Node.js `>= 18` (Tested on `v22.8.0` / `v24.x`)
@@ -363,13 +254,13 @@ npm test
 ```
 
 ### Type Checking
-Validate strict TypeScript compilation across desktop renderer, Electron processes, and companion extension:
+Validate strict TypeScript compilation across desktop renderer and Electron processes:
 ```bash
 npm run typecheck
 ```
 
 ### Building Application Artifacts
-Build all components (Vite desktop bundle, Electron processes, and companion extension):
+Build the desktop application (Vite desktop bundle and Electron processes):
 ```bash
 npm run build
 ```
@@ -377,8 +268,7 @@ npm run build
 Or build individual targets:
 ```bash
 npm run build:vite       # Desktop React renderer
-npm run build:electron   # Electron main, preload, and native host
-npm run build:extension  # Chromium extension (manifest, popup, background, content)
+npm run build:electron   # Electron main and preload
 ```
 
 ### Packaging for Release
@@ -390,10 +280,7 @@ npm run package:win
 # Linux tar.gz and AppImage
 npm run package:linux
 
-# Chromium Browser Extension (.zip and unpacked)
-npm run package:extension
-
-# Package All Platforms
+# Package All Desktop Platforms
 npm run package:all
 ```
 
@@ -411,4 +298,5 @@ npm run dev:vite
 # Terminal 2: Electron application
 npm run dev:electron
 ```
+
 

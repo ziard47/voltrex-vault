@@ -9,6 +9,7 @@ import { UnlockModal } from './components/modals/UnlockModal';
 import { EntryModal } from './components/entries/EntryModal';
 import { PasswordGeneratorModal } from './components/security/PasswordGeneratorModal';
 import { SettingsModal } from './components/modals/SettingsModal';
+import { CheckUpdatesModal } from './components/modals/CheckUpdatesModal';
 import { RestoreConfirmModal } from './components/modals/RestoreConfirmModal';
 import { ToastContainer } from './components/common/ToastContainer';
 
@@ -21,6 +22,7 @@ export const App: React.FC = () => {
     closeEntryModal,
     closeGenerator,
     closeSettings,
+    closeCheckUpdates,
   } = useVault();
 
   // Desktop Global Keyboard Shortcuts
@@ -50,12 +52,13 @@ export const App: React.FC = () => {
         closeEntryModal();
         closeGenerator();
         closeSettings();
+        closeCheckUpdates();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [status.isUnlocked, lockVault, openCreateModal, openGenerator, closeEntryModal, closeGenerator, closeSettings]);
+  }, [status.isUnlocked, lockVault, openCreateModal, openGenerator, closeEntryModal, closeGenerator, closeSettings, closeCheckUpdates]);
 
   return (
     <div className="h-screen w-screen flex flex-col bg-vault-black overflow-hidden font-sans">
@@ -83,6 +86,7 @@ export const App: React.FC = () => {
       <EntryModal />
       <PasswordGeneratorModal />
       <SettingsModal />
+      <CheckUpdatesModal />
       <RestoreConfirmModal />
 
       {/* Feedback Notifications */}

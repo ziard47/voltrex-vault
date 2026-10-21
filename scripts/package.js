@@ -1,12 +1,11 @@
 /**
- * Voltrex Vault - Packaging System
- * Supports Windows setup installer, Linux tar.gz + AppImage, and Browser Extension.
+ * Voltrex Vault - Packaging System (Desktop Application)
+ * Supports Windows setup installer and Linux tar.gz + AppImage.
  *
  * Folder structure:
  * releases/
  *   windows/<version>/
  *   linux/<version>/
- *   extension/<version>/
  */
 
 const fs = require('fs');
@@ -25,10 +24,9 @@ const defaultVersion = pkg.version || '1.0.0';
 const releasesDir = path.resolve(rootDir, 'releases');
 const winReleasesDir = path.resolve(releasesDir, 'windows');
 const linuxReleasesDir = path.resolve(releasesDir, 'linux');
-const extReleasesDir = path.resolve(releasesDir, 'extension');
 
 function ensureDirectories() {
-  for (const dir of [releasesDir, winReleasesDir, linuxReleasesDir, extReleasesDir]) {
+  for (const dir of [releasesDir, winReleasesDir, linuxReleasesDir]) {
     if (!fs.existsSync(dir)) {
       fs.mkdirSync(dir, { recursive: true });
     }
@@ -36,7 +34,7 @@ function ensureDirectories() {
 }
 
 /**
- * Prompts user for version number if not provided via CLI.
+ * Prompts user for input if running in an interactive terminal.
  */
 function askQuestion(query) {
   const rl = readline.createInterface({
@@ -109,7 +107,7 @@ function parseArgs() {
 /**
  * Builds the frontend and electron main/preload code
  */
-function runBuild(includeExtension = true) {
+function runBuild() {
   console.log('--- 1. Building Application Source Code ---');
 
   console.log('Building Vite renderer bundle...');
@@ -117,11 +115,6 @@ function runBuild(includeExtension = true) {
 
   console.log('Building Electron main and preload processes...');
   execSync('npm run build:electron', { cwd: rootDir, stdio: 'inherit' });
-
-  if (includeExtension) {
-    console.log('Building Browser Extension...');
-    execSync('npm run build:extension', { cwd: rootDir, stdio: 'inherit' });
-  }
 
   console.log('Source compilation finished successfully.\n');
 }
@@ -210,7 +203,6 @@ async function packageLinux(version) {
   console.log(` Target output: ${targetDir}`);
   console.log(`========================================\n`);
 
-  // Common linux config
   const linuxConfig = {
     appId: 'com.voltrex.vault',
     productName: 'Voltrex Vault',
@@ -278,71 +270,6 @@ async function packageLinux(version) {
 }
 
 /**
- * Packages Browser Extension
- */
-function packageExtension(version) {
-  const targetDir = path.resolve(extReleasesDir, version);
-  if (!fs.existsSync(targetDir)) {
-    fs.mkdirSync(targetDir, { recursive: true });
-  }
-
-  console.log(`\n========================================`);
-  console.log(` Packaging Browser Extension (v${version})`);
-  console.log(` Target output: ${targetDir}`);
-  console.log(`========================================\n`);
-
-  const distExtDir = path.resolve(rootDir, 'dist/extension');
-  if (!fs.existsSync(distExtDir)) {
-    console.log('Building browser extension first...');
-    execSync('npm run build:extension', { cwd: rootDir, stdio: 'inherit' });
-  }
-
-  // 1. Copy extension files into unpacked release directory
-  const unpackedDir = path.join(targetDir, `voltrex-vault-extension-${version}`);
-  if (fs.existsSync(unpackedDir)) {
-    fs.rmSync(unpackedDir, { recursive: true, force: true });
-  }
-  fs.mkdirSync(unpackedDir, { recursive: true });
-
-  fs.cpSync(distExtDir, unpackedDir, { recursive: true });
-
-  // Update version in manifest.json inside the packaged directory
-  const manifestPath = path.join(unpackedDir, 'manifest.json');
-  if (fs.existsSync(manifestPath)) {
-    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf-8'));
-    manifest.version = version;
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
-  }
-
-  // 2. Create zip archive using tar (built-in on Windows 10/11 and Linux) or PowerShell
-  const zipName = `voltrex-vault-extension-${version}.zip`;
-  const zipPath = path.join(targetDir, zipName);
-  if (fs.existsSync(zipPath)) {
-    fs.unlinkSync(zipPath);
-  }
-
-  try {
-    // bsdtar creates standard zip archives using -a -c -f
-    execSync(`tar -a -c -f "${zipPath}" -C "${unpackedDir}" .`, { stdio: 'pipe' });
-    console.log(`[SUCCESS] Extension zip created: ${zipName}`);
-  } catch {
-    // Fallback on Windows PowerShell Compress-Archive
-    try {
-      execSync(
-        `powershell -NoProfile -Command "Compress-Archive -Path '${unpackedDir}\\*' -DestinationPath '${zipPath}' -Force"`,
-        { stdio: 'pipe' }
-      );
-      console.log(`[SUCCESS] Extension zip created via PowerShell: ${zipName}`);
-    } catch (e) {
-      console.warn(`[WARNING] Could not create zip archive: ${e.message}. Unpacked folder is available.`);
-    }
-  }
-
-  console.log(`\n[SUCCESS] Extension packaged into:`);
-  console.log(`   ${targetDir}\n`);
-}
-
-/**
  * Main Orchestrator
  */
 async function main() {
@@ -358,15 +285,12 @@ async function main() {
     console.log('Select target to package:');
     console.log('  1) Windows (Setup installer)');
     console.log('  2) Linux (tar.gz and AppImage)');
-    console.log('  3) Browser Extension (.zip and unpacked)');
-    console.log('  4) All (Windows, Linux, Extension)');
-    const choice = await askQuestion('Choice [default: 4]: ');
+    console.log('  3) All (Windows and Linux)');
+    const choice = await askQuestion('Choice [default: 3]: ');
     if (choice === '1' || choice.toLowerCase() === 'win' || choice.toLowerCase() === 'windows') {
       platform = 'win';
     } else if (choice === '2' || choice.toLowerCase() === 'linux') {
       platform = 'linux';
-    } else if (choice === '3' || choice.toLowerCase() === 'extension' || choice.toLowerCase() === 'ext') {
-      platform = 'extension';
     } else {
       platform = 'all';
     }
@@ -378,7 +302,7 @@ async function main() {
 
   // 3. Run source build unless skipped
   if (!skipBuild) {
-    runBuild(platform === 'all' || platform === 'extension');
+    runBuild();
   }
 
   // 4. Execute selected packaging
@@ -386,14 +310,11 @@ async function main() {
     await packageWindows(version);
   } else if (platform === 'linux') {
     await packageLinux(version);
-  } else if (platform === 'extension' || platform === 'ext') {
-    packageExtension(version);
   } else if (platform === 'all') {
     await packageWindows(version);
     await packageLinux(version);
-    packageExtension(version);
   } else {
-    console.error(`[ERROR] Unknown platform: ${platform}. Use 'win', 'linux', 'extension', or 'all'.`);
+    console.error(`[ERROR] Unknown platform: ${platform}. Use 'win', 'linux', or 'all'.`);
     process.exit(1);
   }
 
