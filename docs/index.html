@@ -1,672 +1,853 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voltrex Vault — Zero-Knowledge Offline Password & Secrets Manager</title>
-  <meta name="description" content="Open-source, zero-knowledge desktop credential manager. Local AES-256-GCM envelope encryption, 64 MiB Argon2id key derivation, and an embedded SQLite database. No cloud dependence.">
-  <link rel="icon" type="image/jpeg" href="logo.jpg">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+      Voltrex Vault — Zero-Knowledge Offline Password & Secrets Manager
+    </title>
+    <meta
+      name="description"
+      content="Open-source, zero-knowledge desktop credential manager. Local AES-256-GCM envelope encryption, 64 MiB Argon2id key derivation, and an embedded SQLite database. No cloud dependence."
+    />
+    <link rel="icon" type="image/jpeg" href="logo.png" />
 
-  <!-- Google Fonts: Inter & JetBrains Mono -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
 
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+    <!-- Font Awesome 6 (Free) -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+      integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
 
-  <!-- Top Announcement Bar -->
-  <aside class="announcement-bar">
-    <div class="container announcement-inner">
-      <span class="badge-mini">RELEASE</span>
-      <span class="announcement-text"><strong>Voltrex Vault v1.0.0 is out!</strong> Zero-knowledge desktop security with RFC 4180 CSV import.</span>
-      <a href="#downloads" class="announcement-link">Get v1.0.0 &rarr;</a>
-    </div>
-  </aside>
-
-  <!-- Navigation Header -->
-  <header class="navbar" id="top">
-    <div class="container nav-container">
-      <a href="#top" class="brand">
-        <img src="logo.jpg" alt="Voltrex Vault Logo" class="brand-logo" width="32" height="32">
-        <span class="brand-name">VOLTREX <span class="text-lime">VAULT</span></span>
-        <span class="version-tag">v1.0.0</span>
-      </a>
-
-      <nav class="nav-links">
-        <a href="#features">Features</a>
-        <a href="#screenshots">Screenshots</a>
-        <a href="#security">Security</a>
-        <a href="#downloads">Downloads</a>
-        <a href="ARCHITECTURE.md" class="doc-link">Architecture</a>
-        <a href="THREAT_MODEL.md" class="doc-link">Threat Model</a>
-      </nav>
-
-      <div class="nav-actions">
-        <a href="https://github.com/ziard47/voltrex-vault" class="btn btn-secondary btn-sm nav-btn-github" target="_blank" rel="noopener noreferrer">
-          <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          <span class="btn-text">GitHub</span>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Navigation Header -->
+    <header class="navbar" id="top">
+      <div class="container nav-container">
+        <a href="#top" class="brand">
+          <img
+            src="logo.png"
+            alt="Voltrex Vault Logo"
+            class="brand-logo"
+            width="32"
+            height="32"
+          />
+          <span class="brand-name"
+            >VOLTREX <span class="text-lime">VAULT</span></span
+          >
+          <span class="version-tag">v1.0.0</span>
         </a>
-        <a href="#downloads" class="btn btn-primary btn-sm nav-btn-download">Download App</a>
-        
-        <!-- Mobile Menu Toggle Button -->
-        <button class="mobile-menu-toggle" id="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false">
-          <svg class="hamburger-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-          <svg class="close-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="18" y1="6" x2="6" y2="18"/>
-            <line x1="6" y1="6" x2="18" y2="18"/>
-          </svg>
-        </button>
-      </div>
-    </div>
 
-    <!-- Mobile Drawer Dropdown -->
-    <div class="mobile-nav-drawer" id="mobile-drawer" aria-hidden="true">
-      <div class="container mobile-drawer-inner">
-        <nav class="mobile-nav-links">
-          <a href="#features" class="mobile-link">Features</a>
-          <a href="#screenshots" class="mobile-link">Screenshots</a>
-          <a href="#security" class="mobile-link">Security Architecture</a>
-          <a href="#downloads" class="mobile-link">Download Installers</a>
-          <a href="ARCHITECTURE.md" class="mobile-link doc-link">System Architecture &rarr;</a>
-          <a href="THREAT_MODEL.md" class="mobile-link doc-link">Threat Model &rarr;</a>
+        <nav class="nav-links">
+          <a href="#features">Features</a>
+          <a href="#screenshots">Screenshots</a>
+          <a href="#security">Security</a>
+          <a href="#downloads">Downloads</a>
+          <a href="ARCHITECTURE.md" class="doc-link">Architecture</a>
+          <a href="THREAT_MODEL.md" class="doc-link">Threat Model</a>
         </nav>
-        <div class="mobile-nav-footer">
-          <a href="https://github.com/ziard47/voltrex-vault" class="btn btn-secondary btn-block" target="_blank" rel="noopener noreferrer">
-            <svg class="icon" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
-            </svg>
-            <span>View Source on GitHub</span>
+
+        <div class="nav-actions">
+          <a
+            href="https://github.com/ziard47/voltrex-vault"
+            class="btn btn-secondary btn-sm nav-btn-github"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fa-brands fa-github"></i>
+            <span class="btn-text">GitHub</span>
           </a>
-          <a href="#downloads" class="btn btn-primary btn-block mobile-link">
-            <span>Download Voltrex Vault (v1.0.0)</span>
+          <a href="#downloads" class="btn btn-primary btn-sm nav-btn-download">
+            <i class="fa-solid fa-download"></i>
+            <span>Download App</span>
           </a>
+
+          <!-- Mobile Menu Toggle Button -->
+          <button
+            class="mobile-menu-toggle"
+            id="mobile-toggle"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+          >
+            <i class="fa-solid fa-bars hamburger-icon"></i>
+            <i class="fa-solid fa-xmark close-icon"></i>
+          </button>
         </div>
       </div>
-    </div>
-  </header>
 
-  <!-- Hero Section -->
-  <main>
-    <section class="hero-section">
-      <div class="container hero-container">
-        <div class="hero-content">
-          <div class="security-badge-group">
-            <span class="mono-badge">OFFLINE BY DESIGN</span>
-            <span class="mono-badge">ARGON2ID 64 MiB</span>
-            <span class="mono-badge">AES-256-GCM</span>
-          </div>
-
-          <h1 class="hero-title">
-            Your secrets never leave your machine.
-          </h1>
-
-          <p class="hero-subtitle">
-            Voltrex Vault is a zero-knowledge desktop password and secrets manager. Powered by local AES-256-GCM envelope encryption, hardened Argon2id key derivation, and an embedded SQLite database. No mandatory cloud accounts. No telemetry.
-          </p>
-
-          <div class="hero-cta-group">
-            <a href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-Setup-1.0.0.exe" class="btn btn-primary btn-lg" id="hero-primary-download">
-              <svg class="icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <span>Download for Windows (x64)</span>
+      <!-- Mobile Drawer Dropdown -->
+      <div class="mobile-nav-drawer" id="mobile-drawer" aria-hidden="true">
+        <div class="container mobile-drawer-inner">
+          <nav class="mobile-nav-links">
+            <a href="#features" class="mobile-link">Features</a>
+            <a href="#screenshots" class="mobile-link">Screenshots</a>
+            <a href="#security" class="mobile-link">Security Architecture</a>
+            <a href="#downloads" class="mobile-link">Download Installers</a>
+            <a href="ARCHITECTURE.md" class="mobile-link doc-link"
+              >System Architecture <i class="fa-solid fa-arrow-right"></i
+            ></a>
+            <a href="THREAT_MODEL.md" class="mobile-link doc-link"
+              >Threat Model <i class="fa-solid fa-arrow-right"></i
+            ></a>
+          </nav>
+          <div class="mobile-nav-footer">
+            <a
+              href="https://github.com/ziard47/voltrex-vault"
+              class="btn btn-secondary btn-block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <i class="fa-brands fa-github"></i>
+              <span>View Source on GitHub</span>
             </a>
-
-            <a href="#downloads" class="btn btn-secondary btn-lg">
-              <span>View All Platforms</span>
+            <a href="#downloads" class="btn btn-primary btn-block mobile-link">
+              <i class="fa-solid fa-download"></i>
+              <span>Download Voltrex Vault (v1.0.0)</span>
             </a>
           </div>
-
-          <div class="hero-meta-strip">
-            <span class="meta-item">
-              <svg class="meta-icon text-lime" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Free &amp; Open Source (MIT)
-            </span>
-            <span class="meta-separator">&bull;</span>
-            <span class="meta-item">
-              <svg class="meta-icon text-lime" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              100% Client-Side Decryption
-            </span>
-            <span class="meta-separator">&bull;</span>
-            <span class="meta-item">
-              <svg class="meta-icon text-lime" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Cross-Platform (Windows &amp; Linux)
-            </span>
-          </div>
-        </div>
-
-        <!-- Hero Screenshot Frame -->
-        <div class="hero-frame-wrapper">
-          <div class="desktop-mockup">
-            <div class="mockup-titlebar">
-              <div class="mockup-brand">
-                <img src="logo.jpg" alt="" class="mockup-logo">
-                <span class="mockup-title">VOLTREX <span class="text-lime">VAULT</span> v1.0</span>
-              </div>
-              <div class="mockup-window-controls">
-                <span class="mockup-ctrl">_</span>
-                <span class="mockup-ctrl">&#9633;</span>
-                <span class="mockup-ctrl mockup-ctrl-close">&times;</span>
-              </div>
-            </div>
-            <div class="mockup-screen">
-              <img src="screenshots/Screenshot 1.png" alt="Voltrex Vault Main Interface" class="mockup-img" id="hero-img">
-            </div>
-          </div>
         </div>
       </div>
-    </section>
+    </header>
 
-    <!-- Technical Architecture / Proof Strip -->
-    <section class="specs-strip">
-      <div class="container specs-grid">
-        <div class="spec-card">
-          <div class="spec-label">Key Derivation Function</div>
-          <div class="spec-value mono">Argon2id</div>
-          <div class="spec-desc">64 MiB memory, 3 iterations, 4 lanes. Resistant to GPU / ASIC brute-force attacks.</div>
-        </div>
-
-        <div class="spec-card">
-          <div class="spec-label">Cipher Engine</div>
-          <div class="spec-value mono">AES-256-GCM</div>
-          <div class="spec-desc">Envelope encryption with per-record random 96-bit IVs and 128-bit integrity tags.</div>
-        </div>
-
-        <div class="spec-card">
-          <div class="spec-label">Data Storage Engine</div>
-          <div class="spec-value mono">Embedded SQLite</div>
-          <div class="spec-desc">Zero external dependencies. Filesystem restricted to <code>0600</code> permissions.</div>
-        </div>
-
-        <div class="spec-card">
-          <div class="spec-label">Process Security</div>
-          <div class="spec-value mono">Context Isolation</div>
-          <div class="spec-desc">Sandbox enabled. Node integration disabled. Strict CSP with <code>connect-src 'none'</code>.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Screenshots Showcase -->
-    <section class="section" id="screenshots">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">APPLICATION TOUR</span>
-          <h2 class="section-title">Built with purpose. Engineered for daily focus.</h2>
-          <p class="section-subtitle">
-            An ergonomic, dark-mode interface built with high-contrast typography, keyboard shortcuts, and zero distracting visual noise.
-          </p>
-        </div>
-
-        <!-- Screenshots Tabs -->
-        <div class="gallery-tabs" role="tablist">
-          <button class="gallery-tab active" data-target="0" role="tab" aria-selected="true">
-            <span class="tab-index">01</span>
-            <span class="tab-title">Vault Dashboard</span>
-          </button>
-          <button class="gallery-tab" data-target="1" role="tab" aria-selected="false">
-            <span class="tab-index">02</span>
-            <span class="tab-title">Entry Creation</span>
-          </button>
-          <button class="gallery-tab" data-target="2" role="tab" aria-selected="false">
-            <span class="tab-index">03</span>
-            <span class="tab-title">Password Generator</span>
-          </button>
-          <button class="gallery-tab" data-target="3" role="tab" aria-selected="false">
-            <span class="tab-index">04</span>
-            <span class="tab-title">Security &amp; Backups</span>
-          </button>
-        </div>
-
-        <!-- Gallery Showcase Container -->
-        <div class="gallery-display">
-          <div class="gallery-window">
-            <div class="gallery-window-header">
-              <div class="window-tab-info">
-                <span class="window-dot"></span>
-                <span class="window-title" id="gallery-title">Screenshot 1: Main Vault &amp; Category Overview</span>
-              </div>
-              <span class="window-badge" id="gallery-badge">DASHBOARD</span>
+    <!-- Hero Section -->
+    <main>
+      <section class="hero-section">
+        <div class="container hero-container">
+          <div class="hero-content">
+            <div class="security-badge-group">
+              <span class="mono-badge">OFFLINE BY DESIGN</span>
+              <span class="mono-badge">ARGON2ID 64 MiB</span>
+              <span class="mono-badge">AES-256-GCM</span>
             </div>
-            <div class="gallery-window-body">
-              <img src="screenshots/Screenshot 1.png" alt="Voltrex Vault Screenshot" id="gallery-main-image" class="gallery-image">
+
+            <h1 class="hero-title">Your secrets never leave your machine.</h1>
+
+            <p class="hero-subtitle">
+              Voltrex Vault is a zero-knowledge desktop password and secrets
+              manager. Powered by local AES-256-GCM envelope encryption,
+              hardened Argon2id key derivation, and an embedded SQLite database.
+              No mandatory cloud accounts. No telemetry.
+            </p>
+
+            <div class="hero-cta-group">
+              <a
+                href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-Setup-1.0.0.exe"
+                class="btn btn-primary btn-lg"
+                id="hero-primary-download"
+              >
+                <i class="fa-brands fa-windows"></i>
+                <span>Download for Windows (x64)</span>
+              </a>
+
+              <a href="#downloads" class="btn btn-secondary btn-lg">
+                <i class="fa-solid fa-layer-group"></i>
+                <span>View All Platforms</span>
+              </a>
             </div>
           </div>
 
-          <div class="gallery-caption-bar">
-            <div class="caption-text" id="gallery-description">
-              Organize your digital footprint across Logins, Secure Notes, Payment Cards, and Identity profiles with instant search and quick-lock keyboard commands.
+          <!-- Hero Screenshot Frame -->
+          <div class="hero-frame-wrapper">
+            <div class="desktop-mockup">
+              <div class="mockup-titlebar">
+                <div class="mockup-brand">
+                  <img src="logo.jpg" alt="" class="mockup-logo" />
+                  <span class="mockup-title"
+                    >VOLTREX <span class="text-lime">VAULT</span> v1.0</span
+                  >
+                </div>
+                <div class="mockup-window-controls">
+                  <i class="fa-solid fa-minus mockup-ctrl"></i>
+                  <i class="fa-regular fa-square mockup-ctrl"></i>
+                  <i
+                    class="fa-solid fa-xmark mockup-ctrl mockup-ctrl-close"
+                  ></i>
+                </div>
+              </div>
+              <div class="mockup-screen">
+                <img
+                  src="screenshots/Screenshot 1.png"
+                  alt="Voltrex Vault Main Interface"
+                  class="mockup-img"
+                  id="hero-img"
+                />
+              </div>
             </div>
-            <button class="btn btn-secondary btn-sm" id="btn-fullscreen-preview">
-              <svg class="icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
-              </svg>
-              <span>Inspect Fullscreen</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Technical Architecture / Proof Strip -->
+      <section class="specs-strip">
+        <div class="container specs-grid">
+          <div class="spec-card">
+            <div class="spec-label">Key Derivation Function</div>
+            <div class="spec-value mono">Argon2id</div>
+            <div class="spec-desc">
+              64 MiB memory, 3 iterations, 4 lanes. Resistant to GPU / ASIC
+              brute-force attacks.
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-label">Cipher Engine</div>
+            <div class="spec-value mono">AES-256-GCM</div>
+            <div class="spec-desc">
+              Envelope encryption with per-record random 96-bit IVs and 128-bit
+              integrity tags.
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-label">Data Storage Engine</div>
+            <div class="spec-value mono">Embedded SQLite</div>
+            <div class="spec-desc">
+              Zero external dependencies. Filesystem restricted to
+              <code>0600</code> permissions.
+            </div>
+          </div>
+
+          <div class="spec-card">
+            <div class="spec-label">Process Security</div>
+            <div class="spec-value mono">Context Isolation</div>
+            <div class="spec-desc">
+              Sandbox enabled. Node integration disabled. Strict CSP with
+              <code>connect-src 'none'</code>.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive Screenshots Showcase -->
+      <section class="section" id="screenshots">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-eyebrow">APPLICATION TOUR</span>
+            <h2 class="section-title">
+              Built with purpose. Engineered for daily focus.
+            </h2>
+            <p class="section-subtitle">
+              An ergonomic, dark-mode interface built with high-contrast
+              typography, keyboard shortcuts, and zero distracting visual noise.
+            </p>
+          </div>
+
+          <!-- Screenshots Tabs -->
+          <div class="gallery-tabs" role="tablist">
+            <button
+              class="gallery-tab active"
+              data-target="0"
+              role="tab"
+              aria-selected="true"
+            >
+              <span class="tab-index">01</span>
+              <span class="tab-title">Vault Dashboard</span>
+            </button>
+            <button
+              class="gallery-tab"
+              data-target="1"
+              role="tab"
+              aria-selected="false"
+            >
+              <span class="tab-index">02</span>
+              <span class="tab-title">Entry Creation</span>
+            </button>
+            <button
+              class="gallery-tab"
+              data-target="2"
+              role="tab"
+              aria-selected="false"
+            >
+              <span class="tab-index">03</span>
+              <span class="tab-title">Password Generator</span>
+            </button>
+            <button
+              class="gallery-tab"
+              data-target="3"
+              role="tab"
+              aria-selected="false"
+            >
+              <span class="tab-index">04</span>
+              <span class="tab-title">Security &amp; Backups</span>
             </button>
           </div>
-        </div>
-      </div>
-    </section>
 
-    <!-- Key Features Grid -->
-    <section class="section section-dark" id="features">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">CORE CAPABILITIES</span>
-          <h2 class="section-title">Everything you need. Nothing compromised.</h2>
-          <p class="section-subtitle">
-            Essential credential management tools designed to keep you in control of your data without third-party subscriptions.
-          </p>
-        </div>
-
-        <div class="features-grid">
-          <!-- Feature 1 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-                </svg>
+          <!-- Gallery Showcase Container -->
+          <div class="gallery-display">
+            <div class="gallery-window">
+              <div class="gallery-window-header">
+                <div class="window-tab-info">
+                  <span class="window-dot"></span>
+                  <span class="window-title" id="gallery-title"
+                    >Screenshot 1: Main Vault &amp; Category Overview</span
+                  >
+                </div>
+                <span class="window-badge" id="gallery-badge">DASHBOARD</span>
               </div>
-              <span class="feature-tag">ENVELOPE ENCRYPTION</span>
-            </div>
-            <h3 class="feature-name">Per-Record AES-256-GCM</h3>
-            <p class="feature-desc">
-              Every single entry is encrypted with its own uniquely generated 96-bit initialization vector. A compromise of one record gives zero insight into any other record in your vault.
-            </p>
-          </article>
-
-          <!-- Feature 2 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="16 18 22 12 16 6"/>
-                  <polyline points="8 6 2 12 8 18"/>
-                </svg>
-              </div>
-              <span class="feature-tag">INTEROPERABILITY</span>
-            </div>
-            <h3 class="feature-name">RFC 4180 CSV Importer</h3>
-            <p class="feature-desc">
-              Migrate seamlessly. Built-in parser extracts credentials from Bitwarden, Google Chrome, 1Password, and LastPass CSV exports, including multi-line notes and 2FA secrets.
-            </p>
-          </article>
-
-          <!-- Feature 3 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                </svg>
-              </div>
-              <span class="feature-tag">ENTROPY ANALYSIS</span>
-            </div>
-            <h3 class="feature-name">Cryptographic Generator</h3>
-            <p class="feature-desc">
-              Generate non-predictable passwords with real-time Shannon entropy calculation (up to 128+ bits). Tailor character sets and filter visually ambiguous glyphs like <code>0/O/l/1</code>.
-            </p>
-          </article>
-
-          <!-- Feature 4 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="17 8 12 3 7 8"/>
-                  <line x1="12" y1="3" x2="12" y2="15"/>
-                </svg>
-              </div>
-              <span class="feature-tag">PORTABILITY</span>
-            </div>
-            <h3 class="feature-name">Encrypted Backup Containers</h3>
-            <p class="feature-desc">
-              Export standalone <code>.voltrex</code> containers encrypted with master-password-derived keys. Supports atomic rollback snapshots and cross-vault collision detection.
-            </p>
-          </article>
-
-          <!-- Feature 5 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polyline points="12 6 12 12 16 14"/>
-                </svg>
-              </div>
-              <span class="feature-tag">SYSTEM HARDENING</span>
-            </div>
-            <h3 class="feature-name">Inactivity Lock &amp; Clipboard Wipe</h3>
-            <p class="feature-desc">
-              Automatic inactivity locks engage when user interaction stops. Copied passwords are automatically purged from the operating system clipboard after 15 to 120 seconds.
-            </p>
-          </article>
-
-          <!-- Feature 6 -->
-          <article class="feature-card">
-            <div class="feature-header">
-              <div class="feature-icon-box">
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/>
-                </svg>
-              </div>
-              <span class="feature-tag">AIR-GAPPED READY</span>
-            </div>
-            <h3 class="feature-name">Zero Mandatory Cloud Services</h3>
-            <p class="feature-desc">
-              Voltrex Vault has no telemetry, no tracking analytics, and no remote dependencies. It functions perfectly inside completely air-gapped environments.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-
-    <!-- Deep-Dive Security & Threat Model -->
-    <section class="section" id="security">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">CRYPTOGRAPHIC RIGOR</span>
-          <h2 class="section-title">Security by implementation, not obscurity.</h2>
-          <p class="section-subtitle">
-            How Voltrex Vault protects your credentials against physical theft, memory snooping, and tampering.
-          </p>
-        </div>
-
-        <!-- Envelope Encryption Pipeline -->
-        <div class="architecture-box">
-          <div class="arch-header">
-            <span class="arch-badge">KEY HIERARCHY &amp; ENVELOPE ENCRYPTION</span>
-            <span class="arch-status mono">VERIFIED PROTOCOL</span>
-          </div>
-
-          <div class="pipeline-steps">
-            <div class="pipeline-step">
-              <div class="step-num mono">01</div>
-              <div class="step-content">
-                <h4 class="step-title">Master Password Input</h4>
-                <p class="step-text">Provided by user. Never persisted to disk in any form.</p>
+              <div class="gallery-window-body">
+                <img
+                  src="screenshots/Screenshot 1.png"
+                  alt="Voltrex Vault Screenshot"
+                  id="gallery-main-image"
+                  class="gallery-image"
+                />
               </div>
             </div>
 
-            <div class="pipeline-arrow">&rarr;</div>
-
-            <div class="pipeline-step">
-              <div class="step-num mono">02</div>
-              <div class="step-content">
-                <h4 class="step-title">Argon2id KDF</h4>
-                <p class="step-text">64 MiB RAM, 3 iterations, 32-byte salt &rarr; derives 256-bit KEK.</p>
+            <div class="gallery-caption-bar">
+              <div class="caption-text" id="gallery-description">
+                Organize your digital footprint across Logins, Secure Notes,
+                Payment Cards, and Identity profiles with instant search and
+                quick-lock keyboard commands.
               </div>
-            </div>
-
-            <div class="pipeline-arrow">&rarr;</div>
-
-            <div class="pipeline-step">
-              <div class="step-num mono">03</div>
-              <div class="step-content">
-                <h4 class="step-title">DEK Unwrapping</h4>
-                <p class="step-text">KEK decrypts the Vault Data Encryption Key (DEK) via AES-256-GCM.</p>
-              </div>
-            </div>
-
-            <div class="pipeline-arrow">&rarr;</div>
-
-            <div class="pipeline-step">
-              <div class="step-num mono">04</div>
-              <div class="step-content">
-                <h4 class="step-title">In-Memory Decryption</h4>
-                <p class="step-text">Individual records decrypted on demand. Zeroized on lock.</p>
-              </div>
+              <button
+                class="btn btn-secondary btn-sm"
+                id="btn-fullscreen-preview"
+              >
+                <i class="fa-solid fa-expand"></i>
+                <span>Inspect Fullscreen</span>
+              </button>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- Security Matrix Table -->
-        <div class="table-wrapper">
-          <table class="security-table">
-            <thead>
-              <tr>
-                <th>Attack Vector</th>
-                <th>Security Guarantee</th>
-                <th>Mitigation Technique</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Database Stolen at Rest</strong></td>
-                <td>Zero Plaintext Exposure</td>
-                <td>All payload blobs stored as AES-256-GCM ciphertext in SQLite with <code>0600</code> filesystem mode.</td>
-              </tr>
-              <tr>
-                <td><strong>Ciphertext Tampering</strong></td>
-                <td>Cryptographic Rejection</td>
-                <td>128-bit authentication tag checked prior to decryption. Any altered bit raises <code>CryptoIntegrityError</code>.</td>
-              </tr>
-              <tr>
-                <td><strong>Memory Snooping</strong></td>
-                <td>Ephemeral Key Lifetime</td>
-                <td>Key buffers (DEK, KEK) are zeroized immediately with <code>buf.fill(0)</code> upon vault locking or app shutdown.</td>
-              </tr>
-              <tr>
-                <td><strong>IPC Spoofing / XSS</strong></td>
-                <td>Strict Boundary Isolation</td>
-                <td>Electron <code>contextIsolation: true</code>, strict CSP (<code>connect-src 'none'</code>), senderFrame validation.</td>
-              </tr>
-              <tr>
-                <td><strong>Data Corruption on Restore</strong></td>
-                <td>Pre-Restore Rollback</td>
-                <td>Automatic point-in-time SQLite snapshot created before executing any container restore operations.</td>
-              </tr>
-            </tbody>
-          </table>
+      <!-- Key Features Grid -->
+      <section class="section section-dark" id="features">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-eyebrow">CORE CAPABILITIES</span>
+            <h2 class="section-title">
+              Everything you need. Nothing compromised.
+            </h2>
+            <p class="section-subtitle">
+              Essential credential management tools designed to keep you in
+              control of your data without third-party subscriptions.
+            </p>
+          </div>
+
+          <div class="features-grid">
+            <!-- Feature 1 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-lock"></i>
+                </div>
+                <span class="feature-tag">ENVELOPE ENCRYPTION</span>
+              </div>
+              <h3 class="feature-name">Per-Record AES-256-GCM</h3>
+              <p class="feature-desc">
+                Every single entry is encrypted with its own uniquely generated
+                96-bit initialization vector. A compromise of one record gives
+                zero insight into any other record in your vault.
+              </p>
+            </article>
+
+            <!-- Feature 2 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-file-csv"></i>
+                </div>
+                <span class="feature-tag">INTEROPERABILITY</span>
+              </div>
+              <h3 class="feature-name">RFC 4180 CSV Importer</h3>
+              <p class="feature-desc">
+                Migrate seamlessly. Built-in parser extracts credentials from
+                Bitwarden, Google Chrome, 1Password, and LastPass CSV exports,
+                including multi-line notes and 2FA secrets.
+              </p>
+            </article>
+
+            <!-- Feature 3 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-dice"></i>
+                </div>
+                <span class="feature-tag">ENTROPY ANALYSIS</span>
+              </div>
+              <h3 class="feature-name">Cryptographic Generator</h3>
+              <p class="feature-desc">
+                Generate non-predictable passwords with real-time Shannon
+                entropy calculation (up to 128+ bits). Tailor character sets and
+                filter visually ambiguous glyphs like <code>0/O/l/1</code>.
+              </p>
+            </article>
+
+            <!-- Feature 4 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <span class="feature-tag">PORTABILITY</span>
+              </div>
+              <h3 class="feature-name">Encrypted Backup Containers</h3>
+              <p class="feature-desc">
+                Export standalone <code>.voltrex</code> containers encrypted
+                with master-password-derived keys. Supports atomic rollback
+                snapshots and cross-vault collision detection.
+              </p>
+            </article>
+
+            <!-- Feature 5 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+                <span class="feature-tag">SYSTEM HARDENING</span>
+              </div>
+              <h3 class="feature-name">Inactivity Lock &amp; Clipboard Wipe</h3>
+              <p class="feature-desc">
+                Automatic inactivity locks engage when user interaction stops.
+                Copied passwords are automatically purged from the operating
+                system clipboard after 15 to 120 seconds.
+              </p>
+            </article>
+
+            <!-- Feature 6 -->
+            <article class="feature-card">
+              <div class="feature-header">
+                <div class="feature-icon-box">
+                  <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <span class="feature-tag">AIR-GAPPED READY</span>
+              </div>
+              <h3 class="feature-name">Zero Mandatory Cloud Services</h3>
+              <p class="feature-desc">
+                Voltrex Vault has no telemetry, no tracking analytics, and no
+                remote dependencies. It functions perfectly inside completely
+                air-gapped environments.
+              </p>
+            </article>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Downloads Section -->
-    <section class="section section-dark" id="downloads">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">GET VOLTREX VAULT</span>
-          <h2 class="section-title">Install on your operating system.</h2>
-          <p class="section-subtitle">
-            Binaries are packaged with automated SHA-256 blockmaps and signed executables.
-          </p>
-        </div>
+      <!-- Deep-Dive Security & Threat Model -->
+      <section class="section" id="security">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-eyebrow">CRYPTOGRAPHIC RIGOR</span>
+            <h2 class="section-title">
+              Security by implementation, not obscurity.
+            </h2>
+            <p class="section-subtitle">
+              How Voltrex Vault protects your credentials against physical
+              theft, memory snooping, and tampering.
+            </p>
+          </div>
 
-        <div class="download-cards-grid">
-          <!-- Windows Card -->
-          <div class="download-card highlight-card">
-            <div class="dl-platform">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                <path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/>
-              </svg>
-              <div>
-                <h3 class="dl-name">Windows</h3>
-                <span class="dl-arch">x64 Installer (Windows 10 / 11)</span>
+          <!-- Envelope Encryption Pipeline -->
+          <div class="architecture-box">
+            <div class="arch-header">
+              <span class="arch-badge"
+                >KEY HIERARCHY &amp; ENVELOPE ENCRYPTION</span
+              >
+              <span class="arch-status mono">VERIFIED PROTOCOL</span>
+            </div>
+
+            <div class="pipeline-steps">
+              <div class="pipeline-step">
+                <div class="step-num mono">01</div>
+                <div class="step-content">
+                  <h4 class="step-title">Master Password Input</h4>
+                  <p class="step-text">
+                    Provided by user. Never persisted to disk in any form.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pipeline-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+
+              <div class="pipeline-step">
+                <div class="step-num mono">02</div>
+                <div class="step-content">
+                  <h4 class="step-title">Argon2id KDF</h4>
+                  <p class="step-text">
+                    64 MiB RAM, 3 iterations, 32-byte salt
+                    <i class="fa-solid fa-arrow-right"></i> derives 256-bit KEK.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pipeline-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+
+              <div class="pipeline-step">
+                <div class="step-num mono">03</div>
+                <div class="step-content">
+                  <h4 class="step-title">DEK Unwrapping</h4>
+                  <p class="step-text">
+                    KEK decrypts the Vault Data Encryption Key (DEK) via
+                    AES-256-GCM.
+                  </p>
+                </div>
+              </div>
+
+              <div class="pipeline-arrow">
+                <i class="fa-solid fa-arrow-right"></i>
+              </div>
+
+              <div class="pipeline-step">
+                <div class="step-num mono">04</div>
+                <div class="step-content">
+                  <h4 class="step-title">In-Memory Decryption</h4>
+                  <p class="step-text">
+                    Individual records decrypted on demand. Zeroized on lock.
+                  </p>
+                </div>
               </div>
             </div>
-            <p class="dl-info">Standard NSIS Setup with desktop shortcut and automated uninstaller.</p>
-            <div class="dl-action">
-              <a href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-Setup-1.0.0.exe" class="btn btn-primary btn-block">
-                <span>Download .exe (v1.0.0)</span>
-              </a>
-            </div>
-            <div class="dl-meta mono">File: Voltrex-Vault-Setup-1.0.0.exe</div>
           </div>
 
-          <!-- Linux Tarball -->
-          <div class="download-card">
-            <div class="dl-platform">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                <path d="M12.002 0c-3.197 0-4.998 2.012-4.998 4.792 0 1.25.39 2.502.972 3.473-.39 1.111-1.807 4.168-1.807 6.115 0 3.474 2.363 5.42 5.833 5.42 3.474 0 5.834-1.946 5.834-5.42 0-1.947-1.417-5.004-1.807-6.115.583-.971.972-2.223.972-3.473C17 2.012 15.2 0 12.002 0zm0 1.39c2.363 0 3.61 1.53 3.61 3.402 0 1.112-.39 2.085-.834 2.918l-.278.417.278.417c.417.695 1.53 3.335 1.53 5.42 0 2.64-1.807 4.03-4.306 4.03-2.5 0-4.306-1.39-4.306-4.03 0-2.085 1.113-4.725 1.53-5.42l.278-.417-.278-.417c-.444-.833-.834-1.806-.834-2.918 0-1.872 1.248-3.402 3.61-3.402z"/>
-              </svg>
-              <div>
-                <h3 class="dl-name">Linux (.tar.gz)</h3>
-                <span class="dl-arch">x64 Portable Archive</span>
-              </div>
-            </div>
-            <p class="dl-info">Portable Linux binary archive. Extract and run on any modern Linux distribution.</p>
-            <div class="dl-action">
-              <a href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-1.0.0.tar.gz" class="btn btn-secondary btn-block">
-                <span>Download .tar.gz (v1.0.0)</span>
-              </a>
-            </div>
-            <div class="dl-meta mono">File: Voltrex-Vault-1.0.0.tar.gz</div>
-          </div>
-
-          <!-- Linux AppImage -->
-          <div class="download-card">
-            <div class="dl-platform">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor">
-                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15v-4H8l4-5 4 5h-3v4h-2z"/>
-              </svg>
-              <div>
-                <h3 class="dl-name">Linux AppImage</h3>
-                <span class="dl-arch">x64 Standalone Executable</span>
-              </div>
-            </div>
-            <p class="dl-info">Single executable for Linux with zero dependencies. Run directly after chmod +x.</p>
-            <div class="dl-action">
-              <a href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-1.0.0.AppImage" class="btn btn-secondary btn-block">
-                <span>Download .AppImage (v1.0.0)</span>
-              </a>
-            </div>
-            <div class="dl-meta mono">File: Voltrex-Vault-1.0.0.AppImage</div>
+          <!-- Security Matrix Table -->
+          <div class="table-wrapper">
+            <table class="security-table">
+              <thead>
+                <tr>
+                  <th>Attack Vector</th>
+                  <th>Security Guarantee</th>
+                  <th>Mitigation Technique</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Database Stolen at Rest</strong></td>
+                  <td>Zero Plaintext Exposure</td>
+                  <td>
+                    All payload blobs stored as AES-256-GCM ciphertext in SQLite
+                    with <code>0600</code> filesystem mode.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Ciphertext Tampering</strong></td>
+                  <td>Cryptographic Rejection</td>
+                  <td>
+                    128-bit authentication tag checked prior to decryption. Any
+                    altered bit raises <code>CryptoIntegrityError</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Memory Snooping</strong></td>
+                  <td>Ephemeral Key Lifetime</td>
+                  <td>
+                    Key buffers (DEK, KEK) are zeroized immediately with
+                    <code>buf.fill(0)</code> upon vault locking or app shutdown.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>IPC Spoofing / XSS</strong></td>
+                  <td>Strict Boundary Isolation</td>
+                  <td>
+                    Electron <code>contextIsolation: true</code>, strict CSP
+                    (<code>connect-src 'none'</code>), senderFrame validation.
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Data Corruption on Restore</strong></td>
+                  <td>Pre-Restore Rollback</td>
+                  <td>
+                    Automatic point-in-time SQLite snapshot created before
+                    executing any container restore operations.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
+      </section>
 
-        <!-- Build From Source Box -->
-        <div class="build-source-box">
-          <div class="source-header">
-            <span class="source-title mono">BUILD FROM SOURCE (NODE 18+)</span>
-            <span class="source-badge">REPRODUCIBLE BUILD</span>
+      <!-- Downloads Section -->
+      <section class="section section-dark" id="downloads">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-eyebrow">GET VOLTREX VAULT</span>
+            <h2 class="section-title">Install on your operating system.</h2>
+            <p class="section-subtitle">
+              Binaries are packaged with automated SHA-256 blockmaps and signed
+              executables.
+            </p>
           </div>
-          <div class="code-terminal">
-            <pre><code><span class="code-comment"># Clone the repository</span>
+
+          <div class="download-cards-grid">
+            <!-- Windows Card -->
+            <div class="download-card highlight-card">
+              <div class="dl-platform">
+                <i class="fa-brands fa-windows dl-icon"></i>
+                <div>
+                  <h3 class="dl-name">Windows</h3>
+                  <span class="dl-arch">x64 Installer (Windows 10 / 11)</span>
+                </div>
+              </div>
+              <p class="dl-info">
+                Standard NSIS Setup with desktop shortcut and automated
+                uninstaller.
+              </p>
+              <div class="dl-action">
+                <a
+                  href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-Setup-1.0.0.exe"
+                  class="btn btn-primary btn-block"
+                >
+                  <i class="fa-solid fa-download"></i>
+                  <span>Download .exe (v1.0.0)</span>
+                </a>
+              </div>
+              <div class="dl-meta mono">
+                File: Voltrex-Vault-Setup-1.0.0.exe
+              </div>
+            </div>
+
+            <!-- Linux Tarball -->
+            <div class="download-card">
+              <div class="dl-platform">
+                <i class="fa-brands fa-linux dl-icon"></i>
+                <div>
+                  <h3 class="dl-name">Linux (.tar.gz)</h3>
+                  <span class="dl-arch">x64 Portable Archive</span>
+                </div>
+              </div>
+              <p class="dl-info">
+                Portable Linux binary archive. Extract and run on any modern
+                Linux distribution.
+              </p>
+              <div class="dl-action">
+                <a
+                  href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-1.0.0.tar.gz"
+                  class="btn btn-secondary btn-block"
+                >
+                  <i class="fa-solid fa-download"></i>
+                  <span>Download .tar.gz (v1.0.0)</span>
+                </a>
+              </div>
+              <div class="dl-meta mono">File: Voltrex-Vault-1.0.0.tar.gz</div>
+            </div>
+
+            <!-- Linux AppImage -->
+            <div class="download-card">
+              <div class="dl-platform">
+                <i class="fa-solid fa-cube dl-icon"></i>
+                <div>
+                  <h3 class="dl-name">Linux AppImage</h3>
+                  <span class="dl-arch">x64 Standalone Executable</span>
+                </div>
+              </div>
+              <p class="dl-info">
+                Single executable for Linux with zero dependencies. Run directly
+                after chmod +x.
+              </p>
+              <div class="dl-action">
+                <a
+                  href="https://github.com/ziard47/voltrex-vault/releases/download/v1.0.0/Voltrex-Vault-1.0.0.AppImage"
+                  class="btn btn-secondary btn-block"
+                >
+                  <i class="fa-solid fa-download"></i>
+                  <span>Download .AppImage (v1.0.0)</span>
+                </a>
+              </div>
+              <div class="dl-meta mono">File: Voltrex-Vault-1.0.0.AppImage</div>
+            </div>
+          </div>
+
+          <!-- Build From Source Box -->
+          <div class="build-source-box">
+            <div class="source-header">
+              <span class="source-title mono"
+                >BUILD FROM SOURCE (NODE 18+)</span
+              >
+              <span class="source-badge">REPRODUCIBLE BUILD</span>
+            </div>
+            <div class="code-terminal">
+              <pre><code><span class="code-comment"># Clone the repository</span>
 git clone https://github.com/ziard47/voltrex-vault.git
 cd voltrex-vault
 
 <span class="code-comment"># Install dependencies</span>
 npm install
 
-<span class="code-comment"># Run all 44 automated cryptographic and security tests</span>
+<span class="code-comment"># Run all 45 automated cryptographic and security tests</span>
 npm test
 
 <span class="code-comment"># Launch the desktop application</span>
 npm start</code></pre>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Technical Documentation Links -->
-    <section class="section">
-      <div class="container">
-        <div class="section-header">
-          <span class="section-eyebrow">DOCUMENTATION</span>
-          <h2 class="section-title">Transparent specifications.</h2>
-          <p class="section-subtitle">
-            Inspect the underlying security proofs and system architecture files directly in this repository.
+      <!-- Technical Documentation Links -->
+      <section class="section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-eyebrow">DOCUMENTATION</span>
+            <h2 class="section-title">Transparent specifications.</h2>
+            <p class="section-subtitle">
+              Inspect the underlying security proofs and system architecture
+              files directly in this repository.
+            </p>
+          </div>
+
+          <div class="docs-links-grid">
+            <a href="ARCHITECTURE.md" class="doc-card">
+              <div class="doc-icon">
+                <i class="fa-solid fa-sitemap"></i>
+              </div>
+              <div>
+                <h3 class="doc-card-title">
+                  System Architecture (ARCHITECTURE.md)
+                </h3>
+                <p class="doc-card-desc">
+                  Comprehensive breakdown of IPC isolation, SQLite repository
+                  schema, key unwrap lifecycles, and memory zeroization.
+                </p>
+              </div>
+              <i class="fa-solid fa-arrow-right doc-arrow"></i>
+            </a>
+
+            <a href="THREAT_MODEL.md" class="doc-card">
+              <div class="doc-icon">
+                <i class="fa-solid fa-shield-virus"></i>
+              </div>
+              <div>
+                <h3 class="doc-card-title">
+                  Threat Model &amp; Risk Matrix (THREAT_MODEL.md)
+                </h3>
+                <p class="doc-card-desc">
+                  Formal analysis of adversary capabilities, offline attacks,
+                  memory dumping mitigations, and cross-site scripting
+                  prevention.
+                </p>
+              </div>
+              <i class="fa-solid fa-arrow-right doc-arrow"></i>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Fullscreen Image Modal -->
+    <div class="modal-backdrop" id="image-modal" aria-hidden="true">
+      <div class="modal-dialog">
+        <button
+          class="modal-close"
+          id="modal-close-btn"
+          aria-label="Close modal"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <img
+          src=""
+          alt="Fullscreen screenshot"
+          id="modal-image"
+          class="modal-content-img"
+        />
+        <div class="modal-caption" id="modal-caption"></div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="container footer-container">
+        <div class="footer-brand">
+          <div class="brand">
+            <img
+              src="logo.png"
+              alt="Voltrex Vault"
+              class="brand-logo"
+              width="24"
+              height="24"
+            />
+            <span class="brand-name"
+              >VOLTREX <span class="text-lime">VAULT</span></span
+            >
+          </div>
+          <p class="footer-tagline">
+            Zero-Knowledge Offline Secrets &amp; Credential Manager.
           </p>
         </div>
 
-        <div class="docs-links-grid">
-          <a href="ARCHITECTURE.md" class="doc-card">
-            <div class="doc-icon">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="doc-card-title">System Architecture (ARCHITECTURE.md)</h3>
-              <p class="doc-card-desc">Comprehensive breakdown of IPC isolation, SQLite repository schema, key unwrap lifecycles, and memory zeroization.</p>
-            </div>
-            <span class="doc-arrow">&rarr;</span>
-          </a>
+        <div class="footer-links-group">
+          <div class="footer-col">
+            <h5 class="footer-heading">Navigation</h5>
+            <a href="#features"
+              ><i class="fa-solid fa-layer-group"></i> Features</a
+            >
+            <a href="#screenshots"
+              ><i class="fa-solid fa-images"></i> Screenshots</a
+            >
+            <a href="#security"
+              ><i class="fa-solid fa-shield-halved"></i> Security</a
+            >
+            <a href="#downloads"
+              ><i class="fa-solid fa-download"></i> Downloads</a
+            >
+          </div>
 
-          <a href="THREAT_MODEL.md" class="doc-card">
-            <div class="doc-icon">
-              <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-              </svg>
-            </div>
-            <div>
-              <h3 class="doc-card-title">Threat Model &amp; Risk Matrix (THREAT_MODEL.md)</h3>
-              <p class="doc-card-desc">Formal analysis of adversary capabilities, offline attacks, memory dumping mitigations, and cross-site scripting prevention.</p>
-            </div>
-            <span class="doc-arrow">&rarr;</span>
-          </a>
+          <div class="footer-col">
+            <h5 class="footer-heading">Documentation</h5>
+            <a href="ARCHITECTURE.md"
+              ><i class="fa-solid fa-sitemap"></i> Architecture</a
+            >
+            <a href="THREAT_MODEL.md"
+              ><i class="fa-solid fa-shield-virus"></i> Threat Model</a
+            >
+            <a
+              href="https://github.com/ziard47/voltrex-vault/blob/main/SECURITY.md"
+              ><i class="fa-solid fa-lock"></i> Security Policy</a
+            >
+          </div>
+
+          <div class="footer-col">
+            <h5 class="footer-heading">Community</h5>
+            <a
+              href="https://github.com/ziard47/voltrex-vault"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-brands fa-github"></i> GitHub Repository</a
+            >
+            <a
+              href="https://github.com/ziard47/voltrex-vault/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-solid fa-tag"></i> Releases</a
+            >
+            <a
+              href="https://github.com/ziard47/voltrex-vault/issues"
+              target="_blank"
+              rel="noopener noreferrer"
+              ><i class="fa-solid fa-circle-exclamation"></i> Issue Tracker</a
+            >
+          </div>
         </div>
       </div>
-    </section>
-  </main>
 
-  <!-- Fullscreen Image Modal -->
-  <div class="modal-backdrop" id="image-modal" aria-hidden="true">
-    <div class="modal-dialog">
-      <button class="modal-close" id="modal-close-btn" aria-label="Close modal">&times;</button>
-      <img src="" alt="Fullscreen screenshot" id="modal-image" class="modal-content-img">
-      <div class="modal-caption" id="modal-caption"></div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="container footer-container">
-      <div class="footer-brand">
-        <div class="brand">
-          <img src="logo.jpg" alt="Voltrex Vault" class="brand-logo" width="24" height="24">
-          <span class="brand-name">VOLTREX <span class="text-lime">VAULT</span></span>
-        </div>
-        <p class="footer-tagline">
-          Zero-Knowledge Offline Secrets &amp; Credential Manager.
+      <div class="container footer-bottom">
+        <p class="copyright">
+          &copy; Voltrex Vault. Developed by Mohomed Ziard | Voltrex Digital.
+          MIT License.
+        </p>
+        <p class="privacy-note">
+          Zero trackers. Zero cookies. 100% Client-Side Static Documentation.
         </p>
       </div>
+    </footer>
 
-      <div class="footer-links-group">
-        <div class="footer-col">
-          <h5 class="footer-heading">Navigation</h5>
-          <a href="#features">Features</a>
-          <a href="#screenshots">Screenshots</a>
-          <a href="#security">Security</a>
-          <a href="#downloads">Downloads</a>
-        </div>
-
-        <div class="footer-col">
-          <h5 class="footer-heading">Documentation</h5>
-          <a href="ARCHITECTURE.md">Architecture</a>
-          <a href="THREAT_MODEL.md">Threat Model</a>
-          <a href="https://github.com/ziard47/voltrex-vault/blob/main/SECURITY.md">Security Policy</a>
-        </div>
-
-        <div class="footer-col">
-          <h5 class="footer-heading">Community</h5>
-          <a href="https://github.com/ziard47/voltrex-vault" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
-          <a href="https://github.com/ziard47/voltrex-vault/releases" target="_blank" rel="noopener noreferrer">Releases</a>
-          <a href="https://github.com/ziard47/voltrex-vault/issues" target="_blank" rel="noopener noreferrer">Issue Tracker</a>
-        </div>
-      </div>
-    </div>
-
-    <div class="container footer-bottom">
-      <p class="copyright">&copy; Voltrex Vault. Developed by Mohomed Ziard | Voltrex Digital. MIT License.</p>
-      <p class="privacy-note">Zero trackers. Zero cookies. 100% Client-Side Static Documentation.</p>
-    </div>
-  </footer>
-
-  <script src="app.js"></script>
-</body>
+    <script src="app.js"></script>
+  </body>
 </html>

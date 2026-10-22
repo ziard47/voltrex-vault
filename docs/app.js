@@ -180,6 +180,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (label) {
         label.textContent = 'Download for Linux (.AppImage)';
       }
+      const icon = heroBtn.querySelector('i');
+      if (icon) {
+        icon.className = 'fa-solid fa-cube';
+      }
     }
   } catch {
     // Ignore and fallback to Windows default
